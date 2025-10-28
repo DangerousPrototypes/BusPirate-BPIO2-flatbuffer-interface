@@ -126,7 +126,7 @@ class BPIOBase:
             return None
         status_dict = self.client.status_request()
         if status_dict:
-            self.print_status_response(status_dict)
+            self.client.print_status_response(status_dict)
         else:
             print("Failed to get status information.")
     def get_status(self):
