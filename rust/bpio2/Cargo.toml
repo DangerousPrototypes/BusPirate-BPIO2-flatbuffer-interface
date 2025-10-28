@@ -1,0 +1,17 @@
+[package]
+name = "bpio2"
+version = "0.2.1"
+description = "Bus Pirate 5+ BPIO2 flatbuffer interface"
+homepage = "https://docs.buspirate.com/docs/binmode-reference/protocol-bpio2/"
+license = "Apache-2.0"
+edition = "2018"
+rust-version = "1.76"
+categories = ["embedded", "encoding", "hardware-support"]
+keywords = ["buspirate", "flatbuffers"]
+
+[dependencies]
+flatbuffers = { version = "25.2.10", default-features = false }
+
+[dev-dependencies]
+cobs = "0.4.0"
+serialport = "4.7.2"
