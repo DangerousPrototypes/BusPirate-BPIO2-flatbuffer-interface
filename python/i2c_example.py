@@ -11,6 +11,20 @@ import sys
 from pybpio.bpio_client import BPIOClient
 from pybpio.bpio_i2c import BPIOI2C
 
+def i2c_scan_example(client):
+    """I2C Scan example with status display."""
+    i2c = BPIOI2C(client)
+    # Configure I2C with all hardware settings
+    print("Configuring I2C interface...\n")
+    if i2c.configure(speed=100000, pullup_enable=True, psu_enable=True, 
+                    psu_set_mv=3300, psu_set_ma=0):
+        
+        Found=i2c.scan()
+        # Print as hex
+        print("I2C Scan Results (Hex):")
+        for addr in Found:
+            print(f"0x{addr:02X}", end=' ')
+
 def i2c_basic_example(client, device_addr=0xA0, register_addr=0x00, read_bytes=8):
     """Basic I2C read example with status display."""
     i2c = BPIOI2C(client)

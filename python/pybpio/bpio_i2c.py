@@ -78,7 +78,7 @@ class BPIOI2C(BPIOBase):
         for addr in range(start_addr, end_addr):
             #for write addresses, start, address, stop
             result = self.transfer(write_data=[addr << 1], read_bytes=0)
-            if result is not None:
+            if result is not False:
                 found_devices.append(addr<<1)
                 #print(f"Device found at 0x{addr:02X}")
             #else:
@@ -86,7 +86,7 @@ class BPIOI2C(BPIOBase):
 
             #for read addresses, start, address + 1, read 1 byte to NACK, stop
             result = self.transfer(write_data=[(addr << 1) | 1], read_bytes=1)
-            if result is not None:
+            if result is not False:
                 found_devices.append(addr<<1|1)
                 #print(f"Device found at 0x{addr:02X} (read)")
             #else:
