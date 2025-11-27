@@ -24,6 +24,10 @@ def i2c_scan_example(client):
         print("I2C Scan Results (Hex):")
         for addr in Found:
             print(f"0x{addr:02X}", end=' ')
+        return True
+    else:
+        print("Failed to configure I2C interface")
+        return False
 
 def i2c_basic_example(client, device_addr=0xA0, register_addr=0x00, read_bytes=8):
     """Basic I2C read example with status display."""
