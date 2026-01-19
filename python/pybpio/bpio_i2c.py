@@ -81,16 +81,16 @@ class BPIOI2C(BPIOBase):
             if result is not False:
                 found_devices.append(addr<<1)
                 #print(f"Device found at 0x{addr:02X}")
-            #else:
-                #self.stop() #clear bus if write failed
+            else:
+                self.stop() #clear bus if write failed
 
             #for read addresses, start, address + 1, read 1 byte to NACK, stop
             result = self.transfer(write_data=[(addr << 1) | 1], read_bytes=1)
             if result is not False:
                 found_devices.append(addr<<1|1)
                 #print(f"Device found at 0x{addr:02X} (read)")
-            #else:
-                #self.stop() #clear bus if read failed
+            else:
+                self.stop() #clear bus if read failed
         self.stop()  # Ensure we stop the bus after scanning
                 
         return found_devices
