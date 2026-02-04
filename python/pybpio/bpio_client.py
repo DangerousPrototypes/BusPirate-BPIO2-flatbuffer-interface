@@ -299,10 +299,37 @@ class BPIOClient:
         """Create a BPIO StatusRequest packet"""
         builder = flatbuffers.Builder(1024)
 
-        # Create the query vector BEFORE starting the StatusRequest table
-        StatusRequest.StartQueryVector(builder, 1)
-        builder.PrependUint8(StatusRequestTypes.StatusRequestTypes.All)
-        #builder.PrependUint8(StatusRequestTypes.StatusRequestTypes.Version)
+        # Define status type mapping for cleaner code
+        STATUS_TYPES = {
+            'version': StatusRequestTypes.StatusRequestTypes.Version,
+            'mode': StatusRequestTypes.StatusRequestTypes.Mode,
+            'pullup': StatusRequestTypes.StatusRequestTypes.Pullup,
+            'psu': StatusRequestTypes.StatusRequestTypes.PSU,
+            'adc': StatusRequestTypes.StatusRequestTypes.ADC,
+            'io': StatusRequestTypes.StatusRequestTypes.IO,
+            'disk': StatusRequestTypes.StatusRequestTypes.Disk,
+            'led': StatusRequestTypes.StatusRequestTypes.LED,
+        }
+
+        # Collect requested status types
+        requested_types = []
+        if not kwargs:
+            # No specific types requested, request all
+            requested_types = [StatusRequestTypes.StatusRequestTypes.All]
+        else:
+            # Collect only the requested types that are True
+            for key, status_type in STATUS_TYPES.items():
+                if kwargs.get(key, False):
+                    requested_types.append(status_type)
+
+            # If user passed kwargs but none were true, request all
+            if not requested_types:
+                requested_types = [StatusRequestTypes.StatusRequestTypes.All]
+
+        # Create the query vector (prepend in reverse order)
+        StatusRequest.StartQueryVector(builder, len(requested_types))
+        for status_type in reversed(requested_types):
+            builder.PrependUint8(status_type)
         query_vector = builder.EndVector()
 
         # Create a StatusRequest
@@ -317,7 +344,7 @@ class BPIOClient:
         status_resp = StatusResponse.StatusResponse()
         status_resp.Init(resp_packet.Contents().Bytes, resp_packet.Contents().Pos)
 
-        # copy the status response into a dictionary
+        # copy the status response into a dictionary (fields may be optional)
         status_dict = {
             'error': status_resp.Error().decode('utf-8') if status_resp.Error() else None,
             'version_flatbuffers_major': status_resp.VersionFlatbuffersMajor(),
@@ -326,28 +353,28 @@ class BPIOClient:
             'version_hardware_minor': status_resp.VersionHardwareMinor(),
             'version_firmware_major': status_resp.VersionFirmwareMajor(),
             'version_firmware_minor': status_resp.VersionFirmwareMinor(),
-            'version_firmware_git_hash': status_resp.VersionFirmwareGitHash().decode('utf-8'),
-            'version_firmware_date': status_resp.VersionFirmwareDate().decode('utf-8'),
-            'modes_available': [status_resp.ModesAvailable(i).decode('utf-8') for i in range(status_resp.ModesAvailableLength())],
+            'version_firmware_git_hash': status_resp.VersionFirmwareGitHash().decode('utf-8') if status_resp.VersionFirmwareGitHash() else None,
+            'version_firmware_date': status_resp.VersionFirmwareDate().decode('utf-8') if status_resp.VersionFirmwareDate() else None,
+            'modes_available': [status_resp.ModesAvailable(i).decode('utf-8') for i in range(status_resp.ModesAvailableLength())] if hasattr(status_resp, 'ModesAvailableLength') else [],
             'mode_current': status_resp.ModeCurrent().decode('utf-8') if status_resp.ModeCurrent() else None,
-            'mode_pin_labels': [status_resp.ModePinLabels(i).decode('utf-8') for i in range(status_resp.ModePinLabelsLength())],
-            'mode_bitorder_msb': status_resp.ModeBitorderMsb(),
-            'mode_max_packet_size': status_resp.ModeMaxPacketSize(),
-            'mode_max_write': status_resp.ModeMaxWrite(),
-            'mode_max_read': status_resp.ModeMaxRead(),
-            'psu_enabled': status_resp.PsuEnabled(),
-            'psu_set_mv': status_resp.PsuSetMv(),
-            'psu_set_ma': status_resp.PsuSetMa(),
-            'psu_measured_mv': status_resp.PsuMeasuredMv(),
-            'psu_measured_ma': status_resp.PsuMeasuredMa(),
-            'psu_current_error': status_resp.PsuCurrentError(),
-            'pullup_enabled': status_resp.PullupEnabled(),
-            'adc_mv': [status_resp.AdcMv(i) for i in range(status_resp.AdcMvLength())],
-            'io_direction': status_resp.IoDirection(),
-            'io_value': status_resp.IoValue(),
-            'disk_size_mb': status_resp.DiskSizeMb(),
-            'disk_used_mb': status_resp.DiskUsedMb(),
-            'led_count': status_resp.LedCount()
+            'mode_pin_labels': [status_resp.ModePinLabels(i).decode('utf-8') for i in range(status_resp.ModePinLabelsLength())] if hasattr(status_resp, 'ModePinLabelsLength') else [],
+            'mode_bitorder_msb': status_resp.ModeBitorderMsb() if hasattr(status_resp, 'ModeBitorderMsb') else None,
+            'mode_max_packet_size': status_resp.ModeMaxPacketSize() if hasattr(status_resp, 'ModeMaxPacketSize') else None,
+            'mode_max_write': status_resp.ModeMaxWrite() if hasattr(status_resp, 'ModeMaxWrite') else None,
+            'mode_max_read': status_resp.ModeMaxRead() if hasattr(status_resp, 'ModeMaxRead') else None,
+            'psu_enabled': status_resp.PsuEnabled() if hasattr(status_resp, 'PsuEnabled') else None,
+            'psu_set_mv': status_resp.PsuSetMv() if hasattr(status_resp, 'PsuSetMv') else None,
+            'psu_set_ma': status_resp.PsuSetMa() if hasattr(status_resp, 'PsuSetMa') else None,
+            'psu_measured_mv': status_resp.PsuMeasuredMv() if hasattr(status_resp, 'PsuMeasuredMv') else None,
+            'psu_measured_ma': status_resp.PsuMeasuredMa() if hasattr(status_resp, 'PsuMeasuredMa') else None,
+            'psu_current_error': status_resp.PsuCurrentError() if hasattr(status_resp, 'PsuCurrentError') else None,
+            'pullup_enabled': status_resp.PullupEnabled() if hasattr(status_resp, 'PullupEnabled') else None,
+            'adc_mv': [status_resp.AdcMv(i) for i in range(status_resp.AdcMvLength())] if hasattr(status_resp, 'AdcMvLength') else [],
+            'io_direction': status_resp.IoDirection() if hasattr(status_resp, 'IoDirection') else None,
+            'io_value': status_resp.IoValue() if hasattr(status_resp, 'IoValue') else None,
+            'disk_size_mb': status_resp.DiskSizeMb() if hasattr(status_resp, 'DiskSizeMb') else None,
+            'disk_used_mb': status_resp.DiskUsedMb() if hasattr(status_resp, 'DiskUsedMb') else None,
+            'led_count': status_resp.LedCount() if hasattr(status_resp, 'LedCount') else None
         }
 
         return status_dict
