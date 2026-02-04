@@ -1174,10 +1174,11 @@ class DataResponse {
 
   String? get error => const fb.StringReader().vTableGetNullable(_bc, _bcOffset, 4);
   List<int>? get dataRead => const fb.Uint8ListReader().vTableGetNullable(_bc, _bcOffset, 6);
+  bool get isAsync => const fb.BoolReader().vTableGet(_bc, _bcOffset, 8, false);
 
   @override
   String toString() {
-    return 'DataResponse{error: ${error}, dataRead: ${dataRead}}';
+    return 'DataResponse{error: ${error}, dataRead: ${dataRead}, isAsync: ${isAsync}}';
   }
 }
 
@@ -1195,7 +1196,7 @@ class DataResponseBuilder {
   final fb.Builder fbBuilder;
 
   void begin() {
-    fbBuilder.startTable(2);
+    fbBuilder.startTable(3);
   }
 
   int addErrorOffset(int? offset) {
@@ -1204,6 +1205,10 @@ class DataResponseBuilder {
   }
   int addDataReadOffset(int? offset) {
     fbBuilder.addOffset(1, offset);
+    return fbBuilder.offset;
+  }
+  int addIsAsync(bool? isAsync) {
+    fbBuilder.addBool(2, isAsync);
     return fbBuilder.offset;
   }
 
@@ -1215,13 +1220,16 @@ class DataResponseBuilder {
 class DataResponseObjectBuilder extends fb.ObjectBuilder {
   final String? _error;
   final List<int>? _dataRead;
+  final bool? _isAsync;
 
   DataResponseObjectBuilder({
     String? error,
     List<int>? dataRead,
+    bool? isAsync,
   })
       : _error = error,
-        _dataRead = dataRead;
+        _dataRead = dataRead,
+        _isAsync = isAsync;
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -1230,9 +1238,10 @@ class DataResponseObjectBuilder extends fb.ObjectBuilder {
         : fbBuilder.writeString(_error!);
     final int? dataReadOffset = _dataRead == null ? null
         : fbBuilder.writeListUint8(_dataRead!);
-    fbBuilder.startTable(2);
+    fbBuilder.startTable(3);
     fbBuilder.addOffset(0, errorOffset);
     fbBuilder.addOffset(1, dataReadOffset);
+    fbBuilder.addBool(2, _isAsync);
     return fbBuilder.endTable();
   }
 

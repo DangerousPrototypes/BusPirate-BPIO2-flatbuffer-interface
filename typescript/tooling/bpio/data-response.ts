@@ -44,8 +44,13 @@ dataReadArray():Uint8Array|null {
   return offset ? new Uint8Array(this.bb!.bytes().buffer, this.bb!.bytes().byteOffset + this.bb!.__vector(this.bb_pos + offset), this.bb!.__vector_len(this.bb_pos + offset)) : null;
 }
 
+isAsync():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 8);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
+}
+
 static startDataResponse(builder:flatbuffers.Builder) {
-  builder.startObject(2);
+  builder.startObject(3);
 }
 
 static addError(builder:flatbuffers.Builder, errorOffset:flatbuffers.Offset) {
@@ -68,15 +73,20 @@ static startDataReadVector(builder:flatbuffers.Builder, numElems:number) {
   builder.startVector(1, numElems, 1);
 }
 
+static addIsAsync(builder:flatbuffers.Builder, isAsync:boolean) {
+  builder.addFieldInt8(2, +isAsync, +false);
+}
+
 static endDataResponse(builder:flatbuffers.Builder):flatbuffers.Offset {
   const offset = builder.endObject();
   return offset;
 }
 
-static createDataResponse(builder:flatbuffers.Builder, errorOffset:flatbuffers.Offset, dataReadOffset:flatbuffers.Offset):flatbuffers.Offset {
+static createDataResponse(builder:flatbuffers.Builder, errorOffset:flatbuffers.Offset, dataReadOffset:flatbuffers.Offset, isAsync:boolean):flatbuffers.Offset {
   DataResponse.startDataResponse(builder);
   DataResponse.addError(builder, errorOffset);
   DataResponse.addDataRead(builder, dataReadOffset);
+  DataResponse.addIsAsync(builder, isAsync);
   return DataResponse.endDataResponse(builder);
 }
 }

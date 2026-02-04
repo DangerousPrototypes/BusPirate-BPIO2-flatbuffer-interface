@@ -36,22 +36,26 @@ public final class DataResponse extends Table {
   public ByteVector dataReadVector(ByteVector obj) { int o = __offset(6); return o != 0 ? obj.__assign(__vector(o), bb) : null; }
   public ByteBuffer dataReadAsByteBuffer() { return __vector_as_bytebuffer(6, 1); }
   public ByteBuffer dataReadInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 6, 1); }
+  public boolean isAsync() { int o = __offset(8); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
 
   public static int createDataResponse(FlatBufferBuilder builder,
       int errorOffset,
-      int dataReadOffset) {
-    builder.startTable(2);
+      int dataReadOffset,
+      boolean isAsync) {
+    builder.startTable(3);
     DataResponse.addDataRead(builder, dataReadOffset);
     DataResponse.addError(builder, errorOffset);
+    DataResponse.addIsAsync(builder, isAsync);
     return DataResponse.endDataResponse(builder);
   }
 
-  public static void startDataResponse(FlatBufferBuilder builder) { builder.startTable(2); }
+  public static void startDataResponse(FlatBufferBuilder builder) { builder.startTable(3); }
   public static void addError(FlatBufferBuilder builder, int errorOffset) { builder.addOffset(0, errorOffset, 0); }
   public static void addDataRead(FlatBufferBuilder builder, int dataReadOffset) { builder.addOffset(1, dataReadOffset, 0); }
   public static int createDataReadVector(FlatBufferBuilder builder, byte[] data) { return builder.createByteVector(data); }
   public static int createDataReadVector(FlatBufferBuilder builder, ByteBuffer data) { return builder.createByteVector(data); }
   public static void startDataReadVector(FlatBufferBuilder builder, int numElems) { builder.startVector(1, numElems, 1); }
+  public static void addIsAsync(FlatBufferBuilder builder, boolean isAsync) { builder.addBoolean(2, isAsync, false); }
   public static int endDataResponse(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

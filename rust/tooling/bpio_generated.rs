@@ -2009,6 +2009,7 @@ impl<'a> flatbuffers::Follow<'a> for DataResponse<'a> {
 impl<'a> DataResponse<'a> {
   pub const VT_ERROR: flatbuffers::VOffsetT = 4;
   pub const VT_DATA_READ: flatbuffers::VOffsetT = 6;
+  pub const VT_IS_ASYNC: flatbuffers::VOffsetT = 8;
 
   #[inline]
   pub unsafe fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
@@ -2022,6 +2023,7 @@ impl<'a> DataResponse<'a> {
     let mut builder = DataResponseBuilder::new(_fbb);
     if let Some(x) = args.data_read { builder.add_data_read(x); }
     if let Some(x) = args.error { builder.add_error(x); }
+    builder.add_is_async(args.is_async);
     builder.finish()
   }
 
@@ -2040,6 +2042,13 @@ impl<'a> DataResponse<'a> {
     // which contains a valid value in this slot
     unsafe { self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'a, u8>>>(DataResponse::VT_DATA_READ, None)}
   }
+  #[inline]
+  pub fn is_async(&self) -> bool {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(DataResponse::VT_IS_ASYNC, Some(false)).unwrap()}
+  }
 }
 
 impl flatbuffers::Verifiable for DataResponse<'_> {
@@ -2051,6 +2060,7 @@ impl flatbuffers::Verifiable for DataResponse<'_> {
     v.visit_table(pos)?
      .visit_field::<flatbuffers::ForwardsUOffset<&str>>("error", Self::VT_ERROR, false)?
      .visit_field::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'_, u8>>>("data_read", Self::VT_DATA_READ, false)?
+     .visit_field::<bool>("is_async", Self::VT_IS_ASYNC, false)?
      .finish();
     Ok(())
   }
@@ -2058,6 +2068,7 @@ impl flatbuffers::Verifiable for DataResponse<'_> {
 pub struct DataResponseArgs<'a> {
     pub error: Option<flatbuffers::WIPOffset<&'a str>>,
     pub data_read: Option<flatbuffers::WIPOffset<flatbuffers::Vector<'a, u8>>>,
+    pub is_async: bool,
 }
 impl<'a> Default for DataResponseArgs<'a> {
   #[inline]
@@ -2065,6 +2076,7 @@ impl<'a> Default for DataResponseArgs<'a> {
     DataResponseArgs {
       error: None,
       data_read: None,
+      is_async: false,
     }
   }
 }
@@ -2081,6 +2093,10 @@ impl<'a: 'b, 'b, A: flatbuffers::Allocator + 'a> DataResponseBuilder<'a, 'b, A> 
   #[inline]
   pub fn add_data_read(&mut self, data_read: flatbuffers::WIPOffset<flatbuffers::Vector<'b , u8>>) {
     self.fbb_.push_slot_always::<flatbuffers::WIPOffset<_>>(DataResponse::VT_DATA_READ, data_read);
+  }
+  #[inline]
+  pub fn add_is_async(&mut self, is_async: bool) {
+    self.fbb_.push_slot::<bool>(DataResponse::VT_IS_ASYNC, is_async, false);
   }
   #[inline]
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a, A>) -> DataResponseBuilder<'a, 'b, A> {
@@ -2102,6 +2118,7 @@ impl core::fmt::Debug for DataResponse<'_> {
     let mut ds = f.debug_struct("DataResponse");
       ds.field("error", &self.error());
       ds.field("data_read", &self.data_read());
+      ds.field("is_async", &self.is_async());
       ds.finish()
   }
 }

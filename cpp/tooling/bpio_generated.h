@@ -1266,7 +1266,8 @@ struct DataResponse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef DataResponseBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_ERROR = 4,
-    VT_DATA_READ = 6
+    VT_DATA_READ = 6,
+    VT_IS_ASYNC = 8
   };
   const ::flatbuffers::String *error() const {
     return GetPointer<const ::flatbuffers::String *>(VT_ERROR);
@@ -1274,12 +1275,16 @@ struct DataResponse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   const ::flatbuffers::Vector<uint8_t> *data_read() const {
     return GetPointer<const ::flatbuffers::Vector<uint8_t> *>(VT_DATA_READ);
   }
+  bool is_async() const {
+    return GetField<uint8_t>(VT_IS_ASYNC, 0) != 0;
+  }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_ERROR) &&
            verifier.VerifyString(error()) &&
            VerifyOffset(verifier, VT_DATA_READ) &&
            verifier.VerifyVector(data_read()) &&
+           VerifyField<uint8_t>(verifier, VT_IS_ASYNC, 1) &&
            verifier.EndTable();
   }
 };
@@ -1293,6 +1298,9 @@ struct DataResponseBuilder {
   }
   void add_data_read(::flatbuffers::Offset<::flatbuffers::Vector<uint8_t>> data_read) {
     fbb_.AddOffset(DataResponse::VT_DATA_READ, data_read);
+  }
+  void add_is_async(bool is_async) {
+    fbb_.AddElement<uint8_t>(DataResponse::VT_IS_ASYNC, static_cast<uint8_t>(is_async), 0);
   }
   explicit DataResponseBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -1308,23 +1316,27 @@ struct DataResponseBuilder {
 inline ::flatbuffers::Offset<DataResponse> CreateDataResponse(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     ::flatbuffers::Offset<::flatbuffers::String> error = 0,
-    ::flatbuffers::Offset<::flatbuffers::Vector<uint8_t>> data_read = 0) {
+    ::flatbuffers::Offset<::flatbuffers::Vector<uint8_t>> data_read = 0,
+    bool is_async = false) {
   DataResponseBuilder builder_(_fbb);
   builder_.add_data_read(data_read);
   builder_.add_error(error);
+  builder_.add_is_async(is_async);
   return builder_.Finish();
 }
 
 inline ::flatbuffers::Offset<DataResponse> CreateDataResponseDirect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     const char *error = nullptr,
-    const std::vector<uint8_t> *data_read = nullptr) {
+    const std::vector<uint8_t> *data_read = nullptr,
+    bool is_async = false) {
   auto error__ = error ? _fbb.CreateString(error) : 0;
   auto data_read__ = data_read ? _fbb.CreateVector<uint8_t>(*data_read) : 0;
   return bpio::CreateDataResponse(
       _fbb,
       error__,
-      data_read__);
+      data_read__,
+      is_async);
 }
 
 struct RequestPacket FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {

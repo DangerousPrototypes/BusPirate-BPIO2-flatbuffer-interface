@@ -53,6 +53,11 @@ class DataResponse : Table() {
         }
     val dataReadAsByteBuffer : ByteBuffer get() = __vector_as_bytebuffer(6, 1)
     fun dataReadInByteBuffer(_bb: ByteBuffer) : ByteBuffer = __vector_in_bytebuffer(_bb, 6, 1)
+    val isAsync : Boolean
+        get() {
+            val o = __offset(8)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else false
+        }
     companion object {
         fun validateVersion() = Constants.FLATBUFFERS_25_2_10()
         fun getRootAsDataResponse(_bb: ByteBuffer): DataResponse = getRootAsDataResponse(_bb, DataResponse())
@@ -60,13 +65,14 @@ class DataResponse : Table() {
             _bb.order(ByteOrder.LITTLE_ENDIAN)
             return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb))
         }
-        fun createDataResponse(builder: FlatBufferBuilder, errorOffset: Int, dataReadOffset: Int) : Int {
-            builder.startTable(2)
+        fun createDataResponse(builder: FlatBufferBuilder, errorOffset: Int, dataReadOffset: Int, isAsync: Boolean) : Int {
+            builder.startTable(3)
             addDataRead(builder, dataReadOffset)
             addError(builder, errorOffset)
+            addIsAsync(builder, isAsync)
             return endDataResponse(builder)
         }
-        fun startDataResponse(builder: FlatBufferBuilder) = builder.startTable(2)
+        fun startDataResponse(builder: FlatBufferBuilder) = builder.startTable(3)
         fun addError(builder: FlatBufferBuilder, error: Int) = builder.addOffset(0, error, 0)
         fun addDataRead(builder: FlatBufferBuilder, dataRead: Int) = builder.addOffset(1, dataRead, 0)
         @kotlin.ExperimentalUnsignedTypes
@@ -78,6 +84,7 @@ class DataResponse : Table() {
             return builder.endVector()
         }
         fun startDataReadVector(builder: FlatBufferBuilder, numElems: Int) = builder.startVector(1, numElems, 1)
+        fun addIsAsync(builder: FlatBufferBuilder, isAsync: Boolean) = builder.addBoolean(2, isAsync, false)
         fun endDataResponse(builder: FlatBufferBuilder) : Int {
             val o = builder.endTable()
             return o

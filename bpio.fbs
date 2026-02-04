@@ -106,6 +106,7 @@ table DataRequest {
 table DataResponse {
   error:string; // Error message if any.
   data_read:[ubyte]; // Data read from device
+  is_async: bool = false;  // NEW 2.2: marks this as unsolicited async data
 }
 
 union RequestPacketContents { StatusRequest, ConfigurationRequest, DataRequest}
