@@ -83,8 +83,20 @@ func (rcv *DataResponse) MutateDataRead(j int, n byte) bool {
 	return false
 }
 
+func (rcv *DataResponse) IsAsync() bool {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
+	if o != 0 {
+		return rcv._tab.GetBool(o + rcv._tab.Pos)
+	}
+	return false
+}
+
+func (rcv *DataResponse) MutateIsAsync(n bool) bool {
+	return rcv._tab.MutateBoolSlot(8, n)
+}
+
 func DataResponseStart(builder *flatbuffers.Builder) {
-	builder.StartObject(2)
+	builder.StartObject(3)
 }
 func DataResponseAddError(builder *flatbuffers.Builder, error flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(error), 0)
@@ -94,6 +106,9 @@ func DataResponseAddDataRead(builder *flatbuffers.Builder, dataRead flatbuffers.
 }
 func DataResponseStartDataReadVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(1, numElems, 1)
+}
+func DataResponseAddIsAsync(builder *flatbuffers.Builder, isAsync bool) {
+	builder.PrependBoolSlot(2, isAsync, false)
 }
 func DataResponseEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

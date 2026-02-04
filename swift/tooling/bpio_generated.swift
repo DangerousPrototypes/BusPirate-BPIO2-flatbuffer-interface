@@ -721,6 +721,7 @@ public struct bpio_DataResponse: FlatBufferObject, Verifiable {
   private enum VTOFFSET: VOffset {
     case error = 4
     case dataRead = 6
+    case isAsync = 8
     var v: Int32 { Int32(self.rawValue) }
     var p: VOffset { self.rawValue }
   }
@@ -732,18 +733,23 @@ public struct bpio_DataResponse: FlatBufferObject, Verifiable {
   public func dataRead(at index: Int32) -> UInt8 { let o = _accessor.offset(VTOFFSET.dataRead.v); return o == 0 ? 0 : _accessor.directRead(of: UInt8.self, offset: _accessor.vector(at: o) + index * 1) }
   public var dataRead: [UInt8] { return _accessor.getVector(at: VTOFFSET.dataRead.v) ?? [] }
   public func withUnsafePointerToDataRead<T>(_ body: (UnsafeRawBufferPointer) throws -> T) rethrows -> T? { return try _accessor.withUnsafePointerToSlice(at: VTOFFSET.dataRead.v, body: body) }
-  public static func startDataResponse(_ fbb: inout FlatBufferBuilder) -> UOffset { fbb.startTable(with: 2) }
+  public var isAsync: Bool { let o = _accessor.offset(VTOFFSET.isAsync.v); return o == 0 ? false : _accessor.readBuffer(of: Bool.self, at: o) }
+  public static func startDataResponse(_ fbb: inout FlatBufferBuilder) -> UOffset { fbb.startTable(with: 3) }
   public static func add(error: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: error, at: VTOFFSET.error.p) }
   public static func addVectorOf(dataRead: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: dataRead, at: VTOFFSET.dataRead.p) }
+  public static func add(isAsync: Bool, _ fbb: inout FlatBufferBuilder) { fbb.add(element: isAsync, def: false,
+   at: VTOFFSET.isAsync.p) }
   public static func endDataResponse(_ fbb: inout FlatBufferBuilder, start: UOffset) -> Offset { let end = Offset(offset: fbb.endTable(at: start)); return end }
   public static func createDataResponse(
     _ fbb: inout FlatBufferBuilder,
     errorOffset error: Offset = Offset(),
-    dataReadVectorOffset dataRead: Offset = Offset()
+    dataReadVectorOffset dataRead: Offset = Offset(),
+    isAsync: Bool = false
   ) -> Offset {
     let __start = bpio_DataResponse.startDataResponse(&fbb)
     bpio_DataResponse.add(error: error, &fbb)
     bpio_DataResponse.addVectorOf(dataRead: dataRead, &fbb)
+    bpio_DataResponse.add(isAsync: isAsync, &fbb)
     return bpio_DataResponse.endDataResponse(&fbb, start: __start)
   }
 
@@ -751,6 +757,7 @@ public struct bpio_DataResponse: FlatBufferObject, Verifiable {
     var _v = try verifier.visitTable(at: position)
     try _v.visit(field: VTOFFSET.error.p, fieldName: "error", required: false, type: ForwardOffset<String>.self)
     try _v.visit(field: VTOFFSET.dataRead.p, fieldName: "dataRead", required: false, type: ForwardOffset<Vector<UInt8, UInt8>>.self)
+    try _v.visit(field: VTOFFSET.isAsync.p, fieldName: "isAsync", required: false, type: Bool.self)
     _v.finish()
   }
 }

@@ -66,23 +66,33 @@ class DataResponse extends Table
     }
 
     /**
+     * @return bool
+     */
+    public function getIsAsync()
+    {
+        $o = $this->__offset(8);
+        return $o != 0 ? $this->bb->getBool($o + $this->bb_pos) : false;
+    }
+
+    /**
      * @param FlatBufferBuilder $builder
      * @return void
      */
     public static function startDataResponse(FlatBufferBuilder $builder)
     {
-        $builder->StartObject(2);
+        $builder->StartObject(3);
     }
 
     /**
      * @param FlatBufferBuilder $builder
      * @return DataResponse
      */
-    public static function createDataResponse(FlatBufferBuilder $builder, $error, $data_read)
+    public static function createDataResponse(FlatBufferBuilder $builder, $error, $data_read, $is_async)
     {
-        $builder->startObject(2);
+        $builder->startObject(3);
         self::addError($builder, $error);
         self::addDataRead($builder, $data_read);
+        self::addIsAsync($builder, $is_async);
         $o = $builder->endObject();
         return $o;
     }
@@ -129,6 +139,16 @@ class DataResponse extends Table
     public static function startDataReadVector(FlatBufferBuilder $builder, $numElems)
     {
         $builder->startVector(1, $numElems, 1);
+    }
+
+    /**
+     * @param FlatBufferBuilder $builder
+     * @param bool
+     * @return void
+     */
+    public static function addIsAsync(FlatBufferBuilder $builder, $isAsync)
+    {
+        $builder->addBoolX(2, $isAsync, false);
     }
 
     /**

@@ -34,17 +34,20 @@ public struct DataResponse : IFlatbufferObject
   public ArraySegment<byte>? GetDataReadBytes() { return __p.__vector_as_arraysegment(6); }
 #endif
   public byte[] GetDataReadArray() { return __p.__vector_as_array<byte>(6); }
+  public bool IsAsync { get { int o = __p.__offset(8); return o != 0 ? 0!=__p.bb.Get(o + __p.bb_pos) : (bool)false; } }
 
   public static Offset<bpio.DataResponse> CreateDataResponse(FlatBufferBuilder builder,
       StringOffset errorOffset = default(StringOffset),
-      VectorOffset data_readOffset = default(VectorOffset)) {
-    builder.StartTable(2);
+      VectorOffset data_readOffset = default(VectorOffset),
+      bool is_async = false) {
+    builder.StartTable(3);
     DataResponse.AddDataRead(builder, data_readOffset);
     DataResponse.AddError(builder, errorOffset);
+    DataResponse.AddIsAsync(builder, is_async);
     return DataResponse.EndDataResponse(builder);
   }
 
-  public static void StartDataResponse(FlatBufferBuilder builder) { builder.StartTable(2); }
+  public static void StartDataResponse(FlatBufferBuilder builder) { builder.StartTable(3); }
   public static void AddError(FlatBufferBuilder builder, StringOffset errorOffset) { builder.AddOffset(0, errorOffset.Value, 0); }
   public static void AddDataRead(FlatBufferBuilder builder, VectorOffset dataReadOffset) { builder.AddOffset(1, dataReadOffset.Value, 0); }
   public static VectorOffset CreateDataReadVector(FlatBufferBuilder builder, byte[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddByte(data[i]); return builder.EndVector(); }
@@ -52,6 +55,7 @@ public struct DataResponse : IFlatbufferObject
   public static VectorOffset CreateDataReadVectorBlock(FlatBufferBuilder builder, ArraySegment<byte> data) { builder.StartVector(1, data.Count, 1); builder.Add(data); return builder.EndVector(); }
   public static VectorOffset CreateDataReadVectorBlock(FlatBufferBuilder builder, IntPtr dataPtr, int sizeInBytes) { builder.StartVector(1, sizeInBytes, 1); builder.Add<byte>(dataPtr, sizeInBytes); return builder.EndVector(); }
   public static void StartDataReadVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
+  public static void AddIsAsync(FlatBufferBuilder builder, bool isAsync) { builder.AddBool(2, isAsync, false); }
   public static Offset<bpio.DataResponse> EndDataResponse(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<bpio.DataResponse>(o);
@@ -66,6 +70,7 @@ static public class DataResponseVerify
     return verifier.VerifyTableStart(tablePos)
       && verifier.VerifyString(tablePos, 4 /*Error*/, false)
       && verifier.VerifyVectorOfData(tablePos, 6 /*DataRead*/, 1 /*byte*/, false)
+      && verifier.VerifyField(tablePos, 8 /*IsAsync*/, 1 /*bool*/, 1, false)
       && verifier.VerifyTableEnd(tablePos);
   }
 }

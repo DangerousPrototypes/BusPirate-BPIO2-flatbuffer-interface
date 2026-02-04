@@ -528,19 +528,24 @@ class DataResponse : flatbuffers.handle
         return read_uint8_le(buf_, buf_.flatbuffers.field_vector(pos_, 6) + i * 1)
     def data_read_length() -> int:
         return flatbuffers.field_vector_len(buf_, pos_, 6)
+    def is_async() -> bool:
+        return bool(flatbuffers.field_int8(buf_, pos_, 8, 0))
 
 def GetRootAsDataResponse(buf:string): return DataResponse { buf, flatbuffers.indirect(buf, 0) }
 
 struct DataResponseBuilder:
     b_:flatbuffers.builder
     def start():
-        b_.StartObject(2)
+        b_.StartObject(3)
         return this
     def add_error(error:flatbuffers.offset):
         b_.PrependUOffsetTRelativeSlot(0, error)
         return this
     def add_data_read(data_read:flatbuffers.offset):
         b_.PrependUOffsetTRelativeSlot(1, data_read)
+        return this
+    def add_is_async(is_async:bool):
+        b_.PrependBoolSlot(2, is_async, 0)
         return this
     def end():
         return b_.EndObject()

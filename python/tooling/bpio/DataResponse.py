@@ -58,8 +58,15 @@ class DataResponse(object):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(6))
         return o == 0
 
+    # DataResponse
+    def IsAsync(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(8))
+        if o != 0:
+            return bool(self._tab.Get(flatbuffers.number_types.BoolFlags, o + self._tab.Pos))
+        return False
+
 def DataResponseStart(builder):
-    builder.StartObject(2)
+    builder.StartObject(3)
 
 def Start(builder):
     DataResponseStart(builder)
@@ -81,6 +88,12 @@ def DataResponseStartDataReadVector(builder, numElems):
 
 def StartDataReadVector(builder, numElems):
     return DataResponseStartDataReadVector(builder, numElems)
+
+def DataResponseAddIsAsync(builder, isAsync):
+    builder.PrependBoolSlot(2, isAsync, 0)
+
+def AddIsAsync(builder, isAsync):
+    DataResponseAddIsAsync(builder, isAsync)
 
 def DataResponseEnd(builder):
     return builder.EndObject()
