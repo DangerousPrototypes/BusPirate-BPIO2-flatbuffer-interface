@@ -146,6 +146,74 @@ class BPIOClient:
         else:
             return None
 
+    def check_async_data(self, timeout=0):
+        """Non-blocking check for asynchronous DataResponse sent by device.
+
+        Returns a dict with keys:
+          - 'is_async' (bool)
+          - 'data_read' (list of ints)
+          - 'error' (str or None)
+        Returns None if no data available within timeout.
+        """
+        # Must have an open serial port
+        if not self.serial_port or not self.serial_port.is_open:
+            return None
+
+        resp_encoded = bytearray()
+        timeout_start = time.time()
+
+        while True:
+            available = self.serial_port.in_waiting
+            if available > 0:
+                chunk = self.serial_port.read(available)
+                resp_encoded.extend(chunk)
+
+                # Check for delimiter
+                delimiter_pos = resp_encoded.find(b'\x00')
+                if delimiter_pos != -1:
+                    resp_encoded = resp_encoded[:delimiter_pos]
+                    break
+            else:
+                if timeout and (time.time() - timeout_start) > timeout:
+                    return None
+                if not timeout:
+                    return None
+                time.sleep(0.001)
+
+        if not resp_encoded:
+            return None
+
+        try:
+            resp_data = cobs.decode(bytes(resp_encoded))
+        except Exception:
+            return None
+
+        try:
+            resp_packet = ResponsePacket.ResponsePacket.GetRootAsResponsePacket(resp_data, 0)
+        except Exception:
+            return None
+
+        # If it's a DataResponse, return structured content
+        if resp_packet.ContentsType() == ResponsePacketContents.ResponsePacketContents.DataResponse:
+            data_resp = DataResponse.DataResponse()
+            data_resp.Init(resp_packet.Contents().Bytes, resp_packet.Contents().Pos)
+            data = []
+            if data_resp.DataReadLength() > 0:
+                # use numpy accessor if available
+                try:
+                    arr = data_resp.DataReadAsNumpy()
+                    data = list(arr.tobytes())
+                except Exception:
+                    data = [data_resp.DataRead(i) for i in range(data_resp.DataReadLength())]
+
+            return {
+                'is_async': bool(data_resp.IsAsync()),
+                'data_read': data,
+                'error': data_resp.Error().decode('utf-8') if data_resp.Error() else None
+            }
+
+        return None
+
     def send_request(self, builder, request_contents_type, request_contents):
         """Send a request packet and return the response"""
         """Wrap contents in a RequestPacket"""
@@ -296,7 +364,7 @@ class BPIOClient:
         return True
 
     def status_request(self, **kwargs):
-        """Create a BPIO StatusRequest packet"""
+        """Create a BPIO StatusRequest packet"""        
         builder = flatbuffers.Builder(1024)
 
         # Define status type mapping for cleaner code
