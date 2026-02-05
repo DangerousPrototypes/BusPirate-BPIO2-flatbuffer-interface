@@ -40,7 +40,7 @@ class BPIOUART(BPIOBase):
         self._monitoring = False
         
     def configure(self, speed=115200, data_bits=8, parity=False, stop_bits=1, 
-                  flow_control=False, signal_inversion=False, **kwargs):
+                  flow_control=False, signal_inversion=False, async_callback=None, **kwargs):
         """Configure UART mode
         
         Args:
@@ -50,6 +50,8 @@ class BPIOUART(BPIOBase):
             stop_bits (int): Number of stop bits, 1 or 2 (default: 1)
             flow_control (bool): Enable hardware flow control (default: False)
             signal_inversion (bool): Invert UART signals (default: False)
+            async_callback (function): Optional callback for async data: callback(data_bytes)
+                                      If provided, async data goes to callback instead of buffer
             **kwargs: Additional configuration parameters
             
         Returns:
@@ -74,9 +76,27 @@ class BPIOUART(BPIOBase):
         success = self.client.configuration_request(**kwargs)         
         self.configured = success
         
+        # If monitoring is already running, stop it first to reconfigure
+        if self._monitoring:
+            self._stop_async_monitoring()
+            # Small delay to ensure thread has fully stopped
+            time.sleep(0.1)
+        
+        # Clear any pending async data in the client's queue
+        self.client.clear_async_queue()
+        
+        # Store callback if provided
+        self._async_callback = async_callback
+        
+        # Clear any buffered data when reconfiguring
+        with self._async_lock:
+            self._async_buffer.clear()
+        
         # Automatically start async monitoring when UART is configured
-        if success and not self._monitoring:
+        if success:
             self._start_async_monitoring()
+            # Small delay to ensure monitoring thread is ready
+            time.sleep(0.05)
         
         return success
     
@@ -134,6 +154,9 @@ class BPIOUART(BPIOBase):
         UART interface. Async monitoring starts automatically when configure() 
         is called, so you can simply call read_async() at any time to get data.
         
+        Note: If an async_callback was provided to configure(), data goes directly
+        to the callback and is not buffered. This method only returns buffered data.
+        
         Args:
             clear_buffer (bool): If True, clear the buffer after reading (default: True)
                                 If False, keep data in buffer for next read
@@ -182,8 +205,18 @@ class BPIOUART(BPIOBase):
                     data_read = async_data.get('data_read', [])
                     
                     if data_read:
-                        with self._async_lock:
-                            self._async_buffer.append(bytes(data_read))
+                        data_bytes = bytes(data_read)
+                        
+                        # If callback is provided, call it; otherwise buffer the data
+                        if hasattr(self, '_async_callback') and self._async_callback:
+                            try:
+                                self._async_callback(data_bytes)
+                            except Exception as e:
+                                print(f"Async callback error: {e}")
+                        else:
+                            # No callback - accumulate in buffer for read_async()
+                            with self._async_lock:
+                                self._async_buffer.append(data_bytes)
                 
                 # Small delay to prevent excessive CPU usage
                 time.sleep(0.01)

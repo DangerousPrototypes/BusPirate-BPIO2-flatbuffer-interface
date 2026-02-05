@@ -268,6 +268,14 @@ class BPIOClient:
             }
 
         return None
+    
+    def clear_async_queue(self):
+        """Clear all pending async data from the queue"""
+        while not self._async_queue.empty():
+            try:
+                self._async_queue.get_nowait()
+            except queue.Empty:
+                break
 
     def send_request(self, builder, request_contents_type, request_contents):
         """Send a request packet and return the response"""
