@@ -3,6 +3,8 @@ import serial
 import time 
 import os
 import sys
+import threading
+import queue
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -34,6 +36,13 @@ class BPIOClient:
         self.version_flatbuffers_major = 2
         self.minimum_version_flatbuffers_minor = minimum_version
         
+        # Packet routing queues
+        self._sync_queue = queue.Queue()   # For sync request/response
+        self._async_queue = queue.Queue()  # For async DataResponse packets
+        self._router_running = False
+        self._router_thread = None
+        self._pending_sync_request = False  # Flag to indicate we're waiting for a sync response
+        
         # Open serial port
         try:
             self.serial_port = serial.Serial(self.port, self.baudrate, timeout=self.timeout)
@@ -46,6 +55,9 @@ class BPIOClient:
         except Exception as e:
             print(f"Error opening serial port: {e}")
             raise
+        
+        # Start the router thread
+        self._start_router()
     
     def __enter__(self):
         """Context manager entry"""
@@ -56,7 +68,8 @@ class BPIOClient:
         self.close()
     
     def close(self):
-        """Close the serial port"""
+        """Close the serial port and stop router thread"""
+        self._stop_router()
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
             if self.debug:
@@ -65,68 +78,136 @@ class BPIOClient:
     def __del__(self):
         """Destructor - ensure port is closed"""
         self.close()
+    
+    def _start_router(self):
+        """Start the packet router thread"""
+        if self._router_running:
+            return
+        self._router_running = True
+        self._router_thread = threading.Thread(target=self._router_loop, daemon=True)
+        self._router_thread.start()
+        if self.debug:
+            print("Router thread started")
+    
+    def _stop_router(self):
+        """Stop the packet router thread"""
+        if not self._router_running:
+            return
+        self._router_running = False
+        if self._router_thread:
+            self._router_thread.join(timeout=1.0)
+            self._router_thread = None
+        if self.debug:
+            print("Router thread stopped")
+    
+    def _router_loop(self):
+        """Router thread: continuously reads packets and routes to appropriate queue"""
+        resp_encoded = bytearray()
+        
+        while self._router_running:
+            try:
+                if not self.serial_port or not self.serial_port.is_open:
+                    time.sleep(0.01)
+                    continue
+                
+                # Check for available data
+                available = self.serial_port.in_waiting
+                if available > 0:
+                    chunk = self.serial_port.read(available)
+                    resp_encoded.extend(chunk)
+                    
+                    # Process all complete packets in buffer
+                    while True:
+                        delimiter_pos = resp_encoded.find(b'\x00')
+                        if delimiter_pos == -1:
+                            break  # No complete packet yet
+                        
+                        # Extract packet (excluding delimiter)
+                        packet_encoded = bytes(resp_encoded[:delimiter_pos])
+                        # Remove packet + delimiter from buffer
+                        del resp_encoded[:delimiter_pos + 1]
+                        
+                        if not packet_encoded:
+                            continue  # Empty packet, skip
+                        
+                        # COBS decode
+                        try:
+                            packet_data = cobs.decode(packet_encoded)
+                        except cobs.DecodeError as e:
+                            if self.debug:
+                                print(f"Router: COBS decode error: {e}")
+                            continue
+                        
+                        # Parse as ResponsePacket to determine routing
+                        try:
+                            resp_packet = ResponsePacket.ResponsePacket.GetRootAsResponsePacket(packet_data, 0)
+                            contents_type = resp_packet.ContentsType()
+                            
+                            # Check if this is an async DataResponse
+                            if contents_type == ResponsePacketContents.ResponsePacketContents.DataResponse:
+                                data_resp = DataResponse.DataResponse()
+                                data_resp.Init(resp_packet.Contents().Bytes, resp_packet.Contents().Pos)
+                                
+                                if data_resp.IsAsync():
+                                    # Async packet -> async queue
+                                    self._async_queue.put(packet_data)
+                                    if self.debug:
+                                        print(f"Router: async DataResponse -> async_queue")
+                                else:
+                                    # Sync response -> sync queue
+                                    self._sync_queue.put(packet_data)
+                                    if self.debug:
+                                        print(f"Router: sync DataResponse -> sync_queue")
+                            else:
+                                # All other responses (Config, Status) -> sync queue
+                                self._sync_queue.put(packet_data)
+                                if self.debug:
+                                    print(f"Router: {contents_type} -> sync_queue")
+                                    
+                        except Exception as e:
+                            if self.debug:
+                                print(f"Router: parse error: {e}")
+                            # Put raw data in sync queue as fallback
+                            self._sync_queue.put(packet_data)
+                else:
+                    # No data available, small sleep to prevent busy waiting
+                    time.sleep(0.001)
+                    
+            except Exception as e:
+                if self.debug:
+                    print(f"Router error: {e}")
+                time.sleep(0.01)
         
     def send_and_receive(self, data):
-        """Send COBS-encoded data to serial port and receive COBS-encoded response"""
+        """Send COBS-encoded data to serial port and receive COBS-encoded response via router"""
         if not self.serial_port or not self.serial_port.is_open:
             print("Serial port is not open")
             return None
+        
+        # Clear the sync queue of any stale responses
+        while not self._sync_queue.empty():
+            try:
+                self._sync_queue.get_nowait()
+            except queue.Empty:
+                break
             
         try:           
-            # Clear any pending data
-            self.serial_port.reset_input_buffer()
-            self.serial_port.reset_output_buffer()
-            
             # Send COBS-encoded data followed by delimiter (0x00)
             packet = cobs.encode(data) + b'\x00'
             self.serial_port.write(packet)
             
             if self.debug:
                 print(f"Sent {len(data)} bytes (original data)")
-                print(f"Total bytes sent: {len(packet) + 1} (COBS + delimiter)")
+                print(f"Total bytes sent: {len(packet)} (COBS + delimiter)")
 
-            # Read response until we get the delimiter (0x00) - most efficient
-            resp_encoded = bytearray()
-            timeout_start = time.time()
-
-            while True:
-                # Read all available data at once
-                available = self.serial_port.in_waiting
-                if available > 0:
-                    chunk = self.serial_port.read(available)
-                    resp_encoded.extend(chunk)
-                    
-                    # Check if we have the complete message (contains delimiter)
-                    delimiter_pos = resp_encoded.find(b'\x00')
-                    if delimiter_pos != -1:
-                        # Found delimiter, truncate at delimiter position
-                        resp_encoded = resp_encoded[:delimiter_pos]
-                        break
-                else:
-                    # No data available, check timeout
-                    if time.time() - timeout_start > self.timeout:
-                        print("Timeout waiting for response")
-                        return None
-                    time.sleep(0.001)  # Small delay to prevent busy waiting
-
-            # Convert back to bytes
-            resp_encoded = bytes(resp_encoded)
-            
-            if len(resp_encoded) == 0:
-                print("No response data received")
-                return None
-                
-            if self.debug:
-                print(f"Received {len(resp_encoded)} bytes (COBS encoded)")
-            
-            # COBS decode the response
+            # Wait for response from sync queue
             try:
-                resp_data = cobs.decode(resp_encoded)
+                resp_data = self._sync_queue.get(timeout=self.timeout)
                 if self.debug:
-                    print(f"Decoded {len(resp_data)} bytes")
+                    print(f"Received {len(resp_data)} bytes from sync_queue")
                 return resp_data
-            except cobs.DecodeError as e:
-                print(f"COBS decode error: {e}")
+            except queue.Empty:
+                print("Timeout waiting for response")
                 return None
 
         except serial.SerialException as e:
@@ -147,7 +228,7 @@ class BPIOClient:
             return None
 
     def check_async_data(self, timeout=0):
-        """Non-blocking check for asynchronous DataResponse sent by device.
+        """Check for asynchronous DataResponse from the async queue.
 
         Returns a dict with keys:
           - 'is_async' (bool)
@@ -155,37 +236,12 @@ class BPIOClient:
           - 'error' (str or None)
         Returns None if no data available within timeout.
         """
-        # Must have an open serial port
-        if not self.serial_port or not self.serial_port.is_open:
-            return None
-
-        resp_encoded = bytearray()
-        timeout_start = time.time()
-
-        while True:
-            available = self.serial_port.in_waiting
-            if available > 0:
-                chunk = self.serial_port.read(available)
-                resp_encoded.extend(chunk)
-
-                # Check for delimiter
-                delimiter_pos = resp_encoded.find(b'\x00')
-                if delimiter_pos != -1:
-                    resp_encoded = resp_encoded[:delimiter_pos]
-                    break
-            else:
-                if timeout and (time.time() - timeout_start) > timeout:
-                    return None
-                if not timeout:
-                    return None
-                time.sleep(0.001)
-
-        if not resp_encoded:
-            return None
-
         try:
-            resp_data = cobs.decode(bytes(resp_encoded))
-        except Exception:
+            if timeout:
+                resp_data = self._async_queue.get(timeout=timeout)
+            else:
+                resp_data = self._async_queue.get_nowait()
+        except queue.Empty:
             return None
 
         try:
@@ -193,13 +249,12 @@ class BPIOClient:
         except Exception:
             return None
 
-        # If it's a DataResponse, return structured content
+        # Parse DataResponse content
         if resp_packet.ContentsType() == ResponsePacketContents.ResponsePacketContents.DataResponse:
             data_resp = DataResponse.DataResponse()
             data_resp.Init(resp_packet.Contents().Bytes, resp_packet.Contents().Pos)
             data = []
             if data_resp.DataReadLength() > 0:
-                # use numpy accessor if available
                 try:
                     arr = data_resp.DataReadAsNumpy()
                     data = list(arr.tobytes())

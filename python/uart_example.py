@@ -13,7 +13,8 @@ def uart_async_example(client, speed=115200):
 
     # Configure UART with all hardware settings
     print("Configuring UART interface...\n")
-    if uart.configure(speed=speed, data_bits=8, parity=False, stop_bits=1):
+    if uart.configure(speed=speed, data_bits=8, parity=False, stop_bits=1, psu_enable=True, psu_set_mv=3300, 
+                    psu_set_ma=0):
 
         print(f"UART configured at {speed} baud\n")
                 
@@ -32,16 +33,9 @@ def uart_async_example(client, speed=115200):
         if response:
             print(f"TX: {test_message.hex()} ({test_message})")
         
-        # Read some data
-        print("Reading 10 bytes...")
-        response = uart.read(10)
-        if response and 'data_read' in response:
-            data = bytes(response['data_read'])
-            print(f"RX: {data.hex()} ({data})")
-        """
-        # Monitor for async data for 10 seconds
-        print("Monitoring for async data for 10 seconds...")
-        time.sleep(10)
+        # Monitor for async data for 3 seconds
+        print("Monitoring for async data for 3 seconds...")
+        time.sleep(3)
         
         # Get any buffered data
         buffered_data = uart.get_async_data()
@@ -52,7 +46,6 @@ def uart_async_example(client, speed=115200):
         
         # Stop async monitoring
         uart.stop_async_monitoring()
-        """
         print("UART test complete.")
     else:
         print("Failed to configure UART interface")
