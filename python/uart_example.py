@@ -12,19 +12,12 @@ def uart_async_example(client, speed=115200):
     uart = BPIOUART(client)
 
     # Configure UART with all hardware settings
+    # Async monitoring starts automatically
     print("Configuring UART interface...\n")
     if uart.configure(speed=speed, data_bits=8, parity=False, stop_bits=1, psu_enable=True, psu_set_mv=3300, 
                     psu_set_ma=0):
 
         print(f"UART configured at {speed} baud\n")
-                
-        # Define callback for async data
-        def async_data_callback(data):
-            print(f"Async RX: {data.hex()} ({data})")
-        
-        # Start async monitoring
-        print("Starting async monitoring...")
-        uart.start_async_monitoring(callback=async_data_callback)
         
         # Send some test data
         print("Sending test message...")
@@ -33,19 +26,17 @@ def uart_async_example(client, speed=115200):
         if response:
             print(f"TX: {test_message.hex()} ({test_message})")
         
-        # Monitor for async data for 3 seconds
-        print("Monitoring for async data for 3 seconds...")
+        # Wait for async loopback data
+        print("Waiting for async loopback data (3 seconds)...")
         time.sleep(3)
         
-        # Get any buffered data
-        buffered_data = uart.get_async_data()
-        if buffered_data:
-            print(f"Buffered async data: {len(buffered_data)} packets")
-            for i, data in enumerate(buffered_data):
-                print(f"  Packet {i}: {data.hex()} ({data})")
+        # Read any async data that was buffered
+        async_data = uart.read_async()
+        if async_data:
+            print(f"Async RX: {async_data.hex()} ({async_data})")
+        else:
+            print("No async data received")
         
-        # Stop async monitoring
-        uart.stop_async_monitoring()
         print("UART test complete.")
     else:
         print("Failed to configure UART interface")

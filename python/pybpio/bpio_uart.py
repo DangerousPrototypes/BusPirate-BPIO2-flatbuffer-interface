@@ -73,6 +73,11 @@ class BPIOUART(BPIOBase):
 
         success = self.client.configuration_request(**kwargs)         
         self.configured = success
+        
+        # Automatically start async monitoring when UART is configured
+        if success and not self._monitoring:
+            self._start_async_monitoring()
+        
         return success
     
     def write(self, data):
@@ -122,43 +127,49 @@ class BPIOUART(BPIOBase):
             bytes_read=read_bytes
         )
     
-    def start_async_monitoring(self, callback=None):
-        """Start monitoring for asynchronous UART data
+    def read_async(self, clear_buffer=True):
+        """Read any accumulated asynchronous data from the buffer.
+        
+        This method retrieves data that was received asynchronously from the 
+        UART interface. Async monitoring starts automatically when configure() 
+        is called, so you can simply call read_async() at any time to get data.
         
         Args:
-            callback (function): Optional callback function called when async data arrives
-                                 Function signature: callback(data_bytes)
+            clear_buffer (bool): If True, clear the buffer after reading (default: True)
+                                If False, keep data in buffer for next read
+        
+        Returns:
+            bytes: Concatenated async data received, or empty bytes if none available
         """
-        if not self.configured:
-            print("UART not configured. Call configure() first.")
-            return False
+        with self._async_lock:
+            if not self._async_buffer:
+                return b''
+            
+            # Concatenate all buffered chunks into single bytes object
+            result = b''.join(self._async_buffer)
+            
+            if clear_buffer:
+                self._async_buffer.clear()
+            
+            return result
+    
+    def _start_async_monitoring(self):
+        """Internal: Start monitoring for asynchronous UART data"""
+        if self._monitoring:
+            return
             
         self._monitoring = True
-        self._async_callback = callback
         
         # Start monitoring thread
         self._monitor_thread = threading.Thread(target=self._async_monitor_loop)
         self._monitor_thread.daemon = True
         self._monitor_thread.start()
-        
-        return True
     
-    def stop_async_monitoring(self):
-        """Stop monitoring for asynchronous UART data"""
+    def _stop_async_monitoring(self):
+        """Internal: Stop monitoring for asynchronous UART data"""
         self._monitoring = False
         if hasattr(self, '_monitor_thread'):
             self._monitor_thread.join(timeout=1.0)
-    
-    def get_async_data(self):
-        """Get any accumulated asynchronous data
-        
-        Returns:
-            list: List of byte arrays received asynchronously
-        """
-        with self._async_lock:
-            data = self._async_buffer[:]
-            self._async_buffer.clear()
-            return data
     
     def _async_monitor_loop(self):
         """Internal monitoring loop for async data"""
@@ -173,13 +184,6 @@ class BPIOUART(BPIOBase):
                     if data_read:
                         with self._async_lock:
                             self._async_buffer.append(bytes(data_read))
-                        
-                        # Call callback if provided
-                        if hasattr(self, '_async_callback') and self._async_callback:
-                            try:
-                                self._async_callback(bytes(data_read))
-                            except Exception as e:
-                                print(f"Async callback error: {e}")
                 
                 # Small delay to prevent excessive CPU usage
                 time.sleep(0.01)
@@ -191,4 +195,4 @@ class BPIOUART(BPIOBase):
     def __del__(self):
         """Cleanup when object is destroyed"""
         if hasattr(self, '_monitoring') and self._monitoring:
-            self.stop_async_monitoring()
+            self._stop_async_monitoring()
