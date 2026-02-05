@@ -42,7 +42,8 @@ def spi_read_jedec_id(client, speed=1000000):
                 0x20: "Micron/ST",
                 0x01: "Spansion/Cypress",
                 0xBF: "SST/Microchip",
-                0x1F: "Atmel/Adesto"
+                0x1F: "Atmel/Adesto",
+                0x85: "Puya"
             }
             
             if manufacturer in manufacturers:
