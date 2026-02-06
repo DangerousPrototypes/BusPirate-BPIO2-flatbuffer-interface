@@ -82,11 +82,17 @@ class BPIOLED(BPIOBase):
         self.configured = success
         return success
     
-    def write(self, data):
+    def write(self, data, start_main=True, stop_main=True):
         """Write raw data to LED device
         
         Args:
             data (bytes or list): Raw data to write to LEDs
+            start_main (bool): Send START condition before write (default: True)
+                              For WS2812/ONBOARD: Initiates reset pulse
+                              For APA102: Sends start frame (0x00000000)
+            stop_main (bool): Send STOP condition after write (default: True)
+                             For WS2812/ONBOARD: Finalizes reset pulse
+                             For APA102: Sends end frame
             
         Returns:
             dict: Response from device, None if error
@@ -95,12 +101,12 @@ class BPIOLED(BPIOBase):
             return None
             
         return self.client.data_request(
-            start_main=True,
+            start_main=start_main,
             data_write=data,
-            stop_main=True
+            stop_main=stop_main
         )
     
-    def set_rgb(self, r, g, b, brightness=31):
+    def set_rgb(self, r, g, b, brightness=31, start_main=True, stop_main=True):
         """Set a single LED to RGB color
         
         For ONBOARD: Sets the onboard RGB LED (brightness ignored)
@@ -112,6 +118,8 @@ class BPIOLED(BPIOBase):
             g (int): Green value 0-255
             b (int): Blue value 0-255
             brightness (int): Brightness 0-31 for APA102 (default: 31 = max, ignored for others)
+            start_main (bool): Send START condition (default: True)
+            stop_main (bool): Send STOP condition (default: True)
             
         Returns:
             dict: Response from device, None if error
@@ -137,9 +145,9 @@ class BPIOLED(BPIOBase):
             print("LED type not configured")
             return None
             
-        return self.write(data)
+        return self.write(data, start_main=start_main, stop_main=stop_main)
  
-    def set_rgbw(self, r, g, b, w, brightness=31):
+    def set_rgbw(self, r, g, b, w, brightness=31, start_main=True, stop_main=True):
         """Set a single RGBW LED (WS2812 only)
         
         Args:
@@ -148,6 +156,8 @@ class BPIOLED(BPIOBase):
             b (int): Blue value 0-255
             w (int): White value 0-255
             brightness (int): Brightness 0-31 (ignored for WS2812, kept for API consistency)
+            start_main (bool): Send START condition (default: True)
+            stop_main (bool): Send STOP condition (default: True)
             
         Returns:
             dict: Response from device, None if error
@@ -161,14 +171,16 @@ class BPIOLED(BPIOBase):
         
         # WS2812 RGBW format: GRBW (brightness ignored)
         data = bytes([g, r, b, w])
-        return self.write(data)
+        return self.write(data, start_main=start_main, stop_main=stop_main)
 
-    def set_multiple_rgb(self, colors, brightness=31):
+    def set_multiple_rgb(self, colors, brightness=31, start_main=True, stop_main=True):
         """Set multiple LEDs with RGB values
         
         Args:
             colors (list of tuples): List of (r, g, b) tuples, one per LED
             brightness (int): Brightness 0-31 for APA102 (default: 31 = max, ignored for others)
+            start_main (bool): Send START condition (default: True)
+            stop_main (bool): Send STOP condition (default: True)
             
         Returns:
             dict: Response from device, None if error
@@ -192,7 +204,7 @@ class BPIOLED(BPIOBase):
             print("LED type not configured")
             return None
             
-        return self.write(data)
+        return self.write(data, start_main=start_main, stop_main=stop_main)
     
     def clear(self, num_leds=1):
         """Turn off LEDs (set to black)
@@ -204,4 +216,4 @@ class BPIOLED(BPIOBase):
             dict: Response from device, None if error
         """
         colors = [(0, 0, 0)] * num_leds
-        return self.set_multiple_rgb(colors)
+        return self.set_multiple_rgb(colors, brightness=0, start_main=True, stop_main=True)
