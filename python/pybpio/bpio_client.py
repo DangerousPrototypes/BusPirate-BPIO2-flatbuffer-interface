@@ -27,7 +27,7 @@ import tooling.bpio.StatusResponse as StatusResponse
 #import tooling.bpio.ErrorResponse as ErrorResponse
 
 class BPIOClient:
-    def __init__(self, port, baudrate=3000000, timeout=2, debug=False, minimum_version=0):
+    def __init__(self, port, baudrate=3000000, timeout=2, debug=False, minimum_version=2):
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
