@@ -58,6 +58,11 @@ public struct ConfigurationRequest : IFlatbufferObject
   public bool HardwareBootloader { get { int o = __p.__offset(38); return o != 0 ? 0!=__p.bb.Get(o + __p.bb_pos) : (bool)false; } }
   public bool HardwareReset { get { int o = __p.__offset(40); return o != 0 ? 0!=__p.bb.Get(o + __p.bb_pos) : (bool)false; } }
   public bool HardwareSelftest { get { int o = __p.__offset(42); return o != 0 ? 0!=__p.bb.Get(o + __p.bb_pos) : (bool)false; } }
+  public byte PwmPin { get { int o = __p.__offset(44); return o != 0 ? __p.bb.Get(o + __p.bb_pos) : (byte)0; } }
+  public bool PwmEnable { get { int o = __p.__offset(46); return o != 0 ? 0!=__p.bb.Get(o + __p.bb_pos) : (bool)false; } }
+  public bool PwmDisable { get { int o = __p.__offset(48); return o != 0 ? 0!=__p.bb.Get(o + __p.bb_pos) : (bool)false; } }
+  public uint PwmFrequencyHz { get { int o = __p.__offset(50); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
+  public ushort PwmDutyX10 { get { int o = __p.__offset(52); return o != 0 ? __p.bb.GetUshort(o + __p.bb_pos) : (ushort)500; } }
 
   public static Offset<bpio.ConfigurationRequest> CreateConfigurationRequest(FlatBufferBuilder builder,
       StringOffset modeOffset = default(StringOffset),
@@ -79,14 +84,24 @@ public struct ConfigurationRequest : IFlatbufferObject
       StringOffset print_stringOffset = default(StringOffset),
       bool hardware_bootloader = false,
       bool hardware_reset = false,
-      bool hardware_selftest = false) {
-    builder.StartTable(20);
+      bool hardware_selftest = false,
+      byte pwm_pin = 0,
+      bool pwm_enable = false,
+      bool pwm_disable = false,
+      uint pwm_frequency_hz = 0,
+      ushort pwm_duty_x10 = 500) {
+    builder.StartTable(25);
+    ConfigurationRequest.AddPwmFrequencyHz(builder, pwm_frequency_hz);
     ConfigurationRequest.AddPrintString(builder, print_stringOffset);
     ConfigurationRequest.AddLedColor(builder, led_colorOffset);
     ConfigurationRequest.AddPsuSetMv(builder, psu_set_mv);
     ConfigurationRequest.AddModeConfiguration(builder, mode_configurationOffset);
     ConfigurationRequest.AddMode(builder, modeOffset);
+    ConfigurationRequest.AddPwmDutyX10(builder, pwm_duty_x10);
     ConfigurationRequest.AddPsuSetMa(builder, psu_set_ma);
+    ConfigurationRequest.AddPwmDisable(builder, pwm_disable);
+    ConfigurationRequest.AddPwmEnable(builder, pwm_enable);
+    ConfigurationRequest.AddPwmPin(builder, pwm_pin);
     ConfigurationRequest.AddHardwareSelftest(builder, hardware_selftest);
     ConfigurationRequest.AddHardwareReset(builder, hardware_reset);
     ConfigurationRequest.AddHardwareBootloader(builder, hardware_bootloader);
@@ -104,7 +119,7 @@ public struct ConfigurationRequest : IFlatbufferObject
     return ConfigurationRequest.EndConfigurationRequest(builder);
   }
 
-  public static void StartConfigurationRequest(FlatBufferBuilder builder) { builder.StartTable(20); }
+  public static void StartConfigurationRequest(FlatBufferBuilder builder) { builder.StartTable(25); }
   public static void AddMode(FlatBufferBuilder builder, StringOffset modeOffset) { builder.AddOffset(0, modeOffset.Value, 0); }
   public static void AddModeConfiguration(FlatBufferBuilder builder, Offset<bpio.ModeConfiguration> modeConfigurationOffset) { builder.AddOffset(1, modeConfigurationOffset.Value, 0); }
   public static void AddModeBitorderMsb(FlatBufferBuilder builder, bool modeBitorderMsb) { builder.AddBool(2, modeBitorderMsb, false); }
@@ -130,6 +145,11 @@ public struct ConfigurationRequest : IFlatbufferObject
   public static void AddHardwareBootloader(FlatBufferBuilder builder, bool hardwareBootloader) { builder.AddBool(17, hardwareBootloader, false); }
   public static void AddHardwareReset(FlatBufferBuilder builder, bool hardwareReset) { builder.AddBool(18, hardwareReset, false); }
   public static void AddHardwareSelftest(FlatBufferBuilder builder, bool hardwareSelftest) { builder.AddBool(19, hardwareSelftest, false); }
+  public static void AddPwmPin(FlatBufferBuilder builder, byte pwmPin) { builder.AddByte(20, pwmPin, 0); }
+  public static void AddPwmEnable(FlatBufferBuilder builder, bool pwmEnable) { builder.AddBool(21, pwmEnable, false); }
+  public static void AddPwmDisable(FlatBufferBuilder builder, bool pwmDisable) { builder.AddBool(22, pwmDisable, false); }
+  public static void AddPwmFrequencyHz(FlatBufferBuilder builder, uint pwmFrequencyHz) { builder.AddUint(23, pwmFrequencyHz, 0); }
+  public static void AddPwmDutyX10(FlatBufferBuilder builder, ushort pwmDutyX10) { builder.AddUshort(24, pwmDutyX10, 500); }
   public static Offset<bpio.ConfigurationRequest> EndConfigurationRequest(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<bpio.ConfigurationRequest>(o);
@@ -162,6 +182,11 @@ static public class ConfigurationRequestVerify
       && verifier.VerifyField(tablePos, 38 /*HardwareBootloader*/, 1 /*bool*/, 1, false)
       && verifier.VerifyField(tablePos, 40 /*HardwareReset*/, 1 /*bool*/, 1, false)
       && verifier.VerifyField(tablePos, 42 /*HardwareSelftest*/, 1 /*bool*/, 1, false)
+      && verifier.VerifyField(tablePos, 44 /*PwmPin*/, 1 /*byte*/, 1, false)
+      && verifier.VerifyField(tablePos, 46 /*PwmEnable*/, 1 /*bool*/, 1, false)
+      && verifier.VerifyField(tablePos, 48 /*PwmDisable*/, 1 /*bool*/, 1, false)
+      && verifier.VerifyField(tablePos, 50 /*PwmFrequencyHz*/, 4 /*uint*/, 4, false)
+      && verifier.VerifyField(tablePos, 52 /*PwmDutyX10*/, 2 /*ushort*/, 2, false)
       && verifier.VerifyTableEnd(tablePos);
   }
 }

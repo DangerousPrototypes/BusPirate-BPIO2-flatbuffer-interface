@@ -288,8 +288,68 @@ func (rcv *ConfigurationRequest) MutateHardwareSelftest(n bool) bool {
 	return rcv._tab.MutateBoolSlot(42, n)
 }
 
+func (rcv *ConfigurationRequest) PwmPin() byte {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(44))
+	if o != 0 {
+		return rcv._tab.GetByte(o + rcv._tab.Pos)
+	}
+	return 0
+}
+
+func (rcv *ConfigurationRequest) MutatePwmPin(n byte) bool {
+	return rcv._tab.MutateByteSlot(44, n)
+}
+
+func (rcv *ConfigurationRequest) PwmEnable() bool {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(46))
+	if o != 0 {
+		return rcv._tab.GetBool(o + rcv._tab.Pos)
+	}
+	return false
+}
+
+func (rcv *ConfigurationRequest) MutatePwmEnable(n bool) bool {
+	return rcv._tab.MutateBoolSlot(46, n)
+}
+
+func (rcv *ConfigurationRequest) PwmDisable() bool {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(48))
+	if o != 0 {
+		return rcv._tab.GetBool(o + rcv._tab.Pos)
+	}
+	return false
+}
+
+func (rcv *ConfigurationRequest) MutatePwmDisable(n bool) bool {
+	return rcv._tab.MutateBoolSlot(48, n)
+}
+
+func (rcv *ConfigurationRequest) PwmFrequencyHz() uint32 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(50))
+	if o != 0 {
+		return rcv._tab.GetUint32(o + rcv._tab.Pos)
+	}
+	return 0
+}
+
+func (rcv *ConfigurationRequest) MutatePwmFrequencyHz(n uint32) bool {
+	return rcv._tab.MutateUint32Slot(50, n)
+}
+
+func (rcv *ConfigurationRequest) PwmDutyX10() uint16 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(52))
+	if o != 0 {
+		return rcv._tab.GetUint16(o + rcv._tab.Pos)
+	}
+	return 500
+}
+
+func (rcv *ConfigurationRequest) MutatePwmDutyX10(n uint16) bool {
+	return rcv._tab.MutateUint16Slot(52, n)
+}
+
 func ConfigurationRequestStart(builder *flatbuffers.Builder) {
-	builder.StartObject(20)
+	builder.StartObject(25)
 }
 func ConfigurationRequestAddMode(builder *flatbuffers.Builder, mode flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(mode), 0)
@@ -353,6 +413,21 @@ func ConfigurationRequestAddHardwareReset(builder *flatbuffers.Builder, hardware
 }
 func ConfigurationRequestAddHardwareSelftest(builder *flatbuffers.Builder, hardwareSelftest bool) {
 	builder.PrependBoolSlot(19, hardwareSelftest, false)
+}
+func ConfigurationRequestAddPwmPin(builder *flatbuffers.Builder, pwmPin byte) {
+	builder.PrependByteSlot(20, pwmPin, 0)
+}
+func ConfigurationRequestAddPwmEnable(builder *flatbuffers.Builder, pwmEnable bool) {
+	builder.PrependBoolSlot(21, pwmEnable, false)
+}
+func ConfigurationRequestAddPwmDisable(builder *flatbuffers.Builder, pwmDisable bool) {
+	builder.PrependBoolSlot(22, pwmDisable, false)
+}
+func ConfigurationRequestAddPwmFrequencyHz(builder *flatbuffers.Builder, pwmFrequencyHz uint32) {
+	builder.PrependUint32Slot(23, pwmFrequencyHz, 0)
+}
+func ConfigurationRequestAddPwmDutyX10(builder *flatbuffers.Builder, pwmDutyX10 uint16) {
+	builder.PrependUint16Slot(24, pwmDutyX10, 500)
 }
 func ConfigurationRequestEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

@@ -465,6 +465,11 @@ public struct bpio_ConfigurationRequest: FlatBufferObject, Verifiable {
     case hardwareBootloader = 38
     case hardwareReset = 40
     case hardwareSelftest = 42
+    case pwmPin = 44
+    case pwmEnable = 46
+    case pwmDisable = 48
+    case pwmFrequencyHz = 50
+    case pwmDutyX10 = 52
     var v: Int32 { Int32(self.rawValue) }
     var p: VOffset { self.rawValue }
   }
@@ -495,7 +500,12 @@ public struct bpio_ConfigurationRequest: FlatBufferObject, Verifiable {
   public var hardwareBootloader: Bool { let o = _accessor.offset(VTOFFSET.hardwareBootloader.v); return o == 0 ? false : _accessor.readBuffer(of: Bool.self, at: o) }
   public var hardwareReset: Bool { let o = _accessor.offset(VTOFFSET.hardwareReset.v); return o == 0 ? false : _accessor.readBuffer(of: Bool.self, at: o) }
   public var hardwareSelftest: Bool { let o = _accessor.offset(VTOFFSET.hardwareSelftest.v); return o == 0 ? false : _accessor.readBuffer(of: Bool.self, at: o) }
-  public static func startConfigurationRequest(_ fbb: inout FlatBufferBuilder) -> UOffset { fbb.startTable(with: 20) }
+  public var pwmPin: UInt8 { let o = _accessor.offset(VTOFFSET.pwmPin.v); return o == 0 ? 0 : _accessor.readBuffer(of: UInt8.self, at: o) }
+  public var pwmEnable: Bool { let o = _accessor.offset(VTOFFSET.pwmEnable.v); return o == 0 ? false : _accessor.readBuffer(of: Bool.self, at: o) }
+  public var pwmDisable: Bool { let o = _accessor.offset(VTOFFSET.pwmDisable.v); return o == 0 ? false : _accessor.readBuffer(of: Bool.self, at: o) }
+  public var pwmFrequencyHz: UInt32 { let o = _accessor.offset(VTOFFSET.pwmFrequencyHz.v); return o == 0 ? 0 : _accessor.readBuffer(of: UInt32.self, at: o) }
+  public var pwmDutyX10: UInt16 { let o = _accessor.offset(VTOFFSET.pwmDutyX10.v); return o == 0 ? 500 : _accessor.readBuffer(of: UInt16.self, at: o) }
+  public static func startConfigurationRequest(_ fbb: inout FlatBufferBuilder) -> UOffset { fbb.startTable(with: 25) }
   public static func add(mode: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: mode, at: VTOFFSET.mode.p) }
   public static func add(modeConfiguration: Offset, _ fbb: inout FlatBufferBuilder) { fbb.add(offset: modeConfiguration, at: VTOFFSET.modeConfiguration.p) }
   public static func add(modeBitorderMsb: Bool, _ fbb: inout FlatBufferBuilder) { fbb.add(element: modeBitorderMsb, def: false,
@@ -526,6 +536,13 @@ public struct bpio_ConfigurationRequest: FlatBufferObject, Verifiable {
    at: VTOFFSET.hardwareReset.p) }
   public static func add(hardwareSelftest: Bool, _ fbb: inout FlatBufferBuilder) { fbb.add(element: hardwareSelftest, def: false,
    at: VTOFFSET.hardwareSelftest.p) }
+  public static func add(pwmPin: UInt8, _ fbb: inout FlatBufferBuilder) { fbb.add(element: pwmPin, def: 0, at: VTOFFSET.pwmPin.p) }
+  public static func add(pwmEnable: Bool, _ fbb: inout FlatBufferBuilder) { fbb.add(element: pwmEnable, def: false,
+   at: VTOFFSET.pwmEnable.p) }
+  public static func add(pwmDisable: Bool, _ fbb: inout FlatBufferBuilder) { fbb.add(element: pwmDisable, def: false,
+   at: VTOFFSET.pwmDisable.p) }
+  public static func add(pwmFrequencyHz: UInt32, _ fbb: inout FlatBufferBuilder) { fbb.add(element: pwmFrequencyHz, def: 0, at: VTOFFSET.pwmFrequencyHz.p) }
+  public static func add(pwmDutyX10: UInt16, _ fbb: inout FlatBufferBuilder) { fbb.add(element: pwmDutyX10, def: 500, at: VTOFFSET.pwmDutyX10.p) }
   public static func endConfigurationRequest(_ fbb: inout FlatBufferBuilder, start: UOffset) -> Offset { let end = Offset(offset: fbb.endTable(at: start)); return end }
   public static func createConfigurationRequest(
     _ fbb: inout FlatBufferBuilder,
@@ -548,7 +565,12 @@ public struct bpio_ConfigurationRequest: FlatBufferObject, Verifiable {
     printStringOffset printString: Offset = Offset(),
     hardwareBootloader: Bool = false,
     hardwareReset: Bool = false,
-    hardwareSelftest: Bool = false
+    hardwareSelftest: Bool = false,
+    pwmPin: UInt8 = 0,
+    pwmEnable: Bool = false,
+    pwmDisable: Bool = false,
+    pwmFrequencyHz: UInt32 = 0,
+    pwmDutyX10: UInt16 = 500
   ) -> Offset {
     let __start = bpio_ConfigurationRequest.startConfigurationRequest(&fbb)
     bpio_ConfigurationRequest.add(mode: mode, &fbb)
@@ -571,6 +593,11 @@ public struct bpio_ConfigurationRequest: FlatBufferObject, Verifiable {
     bpio_ConfigurationRequest.add(hardwareBootloader: hardwareBootloader, &fbb)
     bpio_ConfigurationRequest.add(hardwareReset: hardwareReset, &fbb)
     bpio_ConfigurationRequest.add(hardwareSelftest: hardwareSelftest, &fbb)
+    bpio_ConfigurationRequest.add(pwmPin: pwmPin, &fbb)
+    bpio_ConfigurationRequest.add(pwmEnable: pwmEnable, &fbb)
+    bpio_ConfigurationRequest.add(pwmDisable: pwmDisable, &fbb)
+    bpio_ConfigurationRequest.add(pwmFrequencyHz: pwmFrequencyHz, &fbb)
+    bpio_ConfigurationRequest.add(pwmDutyX10: pwmDutyX10, &fbb)
     return bpio_ConfigurationRequest.endConfigurationRequest(&fbb, start: __start)
   }
 
@@ -596,6 +623,11 @@ public struct bpio_ConfigurationRequest: FlatBufferObject, Verifiable {
     try _v.visit(field: VTOFFSET.hardwareBootloader.p, fieldName: "hardwareBootloader", required: false, type: Bool.self)
     try _v.visit(field: VTOFFSET.hardwareReset.p, fieldName: "hardwareReset", required: false, type: Bool.self)
     try _v.visit(field: VTOFFSET.hardwareSelftest.p, fieldName: "hardwareSelftest", required: false, type: Bool.self)
+    try _v.visit(field: VTOFFSET.pwmPin.p, fieldName: "pwmPin", required: false, type: UInt8.self)
+    try _v.visit(field: VTOFFSET.pwmEnable.p, fieldName: "pwmEnable", required: false, type: Bool.self)
+    try _v.visit(field: VTOFFSET.pwmDisable.p, fieldName: "pwmDisable", required: false, type: Bool.self)
+    try _v.visit(field: VTOFFSET.pwmFrequencyHz.p, fieldName: "pwmFrequencyHz", required: false, type: UInt32.self)
+    try _v.visit(field: VTOFFSET.pwmDutyX10.p, fieldName: "pwmDutyX10", required: false, type: UInt16.self)
     _v.finish()
   }
 }

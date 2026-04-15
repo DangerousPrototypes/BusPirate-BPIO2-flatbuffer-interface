@@ -375,13 +375,23 @@ class ConfigurationRequest : flatbuffers.handle
         return bool(flatbuffers.field_int8(buf_, pos_, 40, 0))
     def hardware_selftest() -> bool:
         return bool(flatbuffers.field_int8(buf_, pos_, 42, 0))
+    def pwm_pin() -> int:
+        return flatbuffers.field_uint8(buf_, pos_, 44, 0)
+    def pwm_enable() -> bool:
+        return bool(flatbuffers.field_int8(buf_, pos_, 46, 0))
+    def pwm_disable() -> bool:
+        return bool(flatbuffers.field_int8(buf_, pos_, 48, 0))
+    def pwm_frequency_hz() -> int:
+        return flatbuffers.field_uint32(buf_, pos_, 50, 0)
+    def pwm_duty_x10() -> int:
+        return flatbuffers.field_uint16(buf_, pos_, 52, 500)
 
 def GetRootAsConfigurationRequest(buf:string): return ConfigurationRequest { buf, flatbuffers.indirect(buf, 0) }
 
 struct ConfigurationRequestBuilder:
     b_:flatbuffers.builder
     def start():
-        b_.StartObject(20)
+        b_.StartObject(25)
         return this
     def add_mode(mode:flatbuffers.offset):
         b_.PrependUOffsetTRelativeSlot(0, mode)
@@ -442,6 +452,21 @@ struct ConfigurationRequestBuilder:
         return this
     def add_hardware_selftest(hardware_selftest:bool):
         b_.PrependBoolSlot(19, hardware_selftest, 0)
+        return this
+    def add_pwm_pin(pwm_pin:int):
+        b_.PrependUint8Slot(20, pwm_pin, 0)
+        return this
+    def add_pwm_enable(pwm_enable:bool):
+        b_.PrependBoolSlot(21, pwm_enable, 0)
+        return this
+    def add_pwm_disable(pwm_disable:bool):
+        b_.PrependBoolSlot(22, pwm_disable, 0)
+        return this
+    def add_pwm_frequency_hz(pwm_frequency_hz:int):
+        b_.PrependUint32Slot(23, pwm_frequency_hz, 0)
+        return this
+    def add_pwm_duty_x10(pwm_duty_x10:int):
+        b_.PrependUint16Slot(24, pwm_duty_x10, 500)
         return this
     def end():
         return b_.EndObject()

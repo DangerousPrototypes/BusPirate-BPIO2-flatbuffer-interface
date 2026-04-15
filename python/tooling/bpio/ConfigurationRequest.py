@@ -188,8 +188,43 @@ class ConfigurationRequest(object):
             return bool(self._tab.Get(flatbuffers.number_types.BoolFlags, o + self._tab.Pos))
         return False
 
+    # ConfigurationRequest
+    def PwmPin(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(44))
+        if o != 0:
+            return self._tab.Get(flatbuffers.number_types.Uint8Flags, o + self._tab.Pos)
+        return 0
+
+    # ConfigurationRequest
+    def PwmEnable(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(46))
+        if o != 0:
+            return bool(self._tab.Get(flatbuffers.number_types.BoolFlags, o + self._tab.Pos))
+        return False
+
+    # ConfigurationRequest
+    def PwmDisable(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(48))
+        if o != 0:
+            return bool(self._tab.Get(flatbuffers.number_types.BoolFlags, o + self._tab.Pos))
+        return False
+
+    # ConfigurationRequest
+    def PwmFrequencyHz(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(50))
+        if o != 0:
+            return self._tab.Get(flatbuffers.number_types.Uint32Flags, o + self._tab.Pos)
+        return 0
+
+    # ConfigurationRequest
+    def PwmDutyX10(self):
+        o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(52))
+        if o != 0:
+            return self._tab.Get(flatbuffers.number_types.Uint16Flags, o + self._tab.Pos)
+        return 500
+
 def ConfigurationRequestStart(builder):
-    builder.StartObject(20)
+    builder.StartObject(25)
 
 def Start(builder):
     ConfigurationRequestStart(builder)
@@ -319,6 +354,36 @@ def ConfigurationRequestAddHardwareSelftest(builder, hardwareSelftest):
 
 def AddHardwareSelftest(builder, hardwareSelftest):
     ConfigurationRequestAddHardwareSelftest(builder, hardwareSelftest)
+
+def ConfigurationRequestAddPwmPin(builder, pwmPin):
+    builder.PrependUint8Slot(20, pwmPin, 0)
+
+def AddPwmPin(builder, pwmPin):
+    ConfigurationRequestAddPwmPin(builder, pwmPin)
+
+def ConfigurationRequestAddPwmEnable(builder, pwmEnable):
+    builder.PrependBoolSlot(21, pwmEnable, 0)
+
+def AddPwmEnable(builder, pwmEnable):
+    ConfigurationRequestAddPwmEnable(builder, pwmEnable)
+
+def ConfigurationRequestAddPwmDisable(builder, pwmDisable):
+    builder.PrependBoolSlot(22, pwmDisable, 0)
+
+def AddPwmDisable(builder, pwmDisable):
+    ConfigurationRequestAddPwmDisable(builder, pwmDisable)
+
+def ConfigurationRequestAddPwmFrequencyHz(builder, pwmFrequencyHz):
+    builder.PrependUint32Slot(23, pwmFrequencyHz, 0)
+
+def AddPwmFrequencyHz(builder, pwmFrequencyHz):
+    ConfigurationRequestAddPwmFrequencyHz(builder, pwmFrequencyHz)
+
+def ConfigurationRequestAddPwmDutyX10(builder, pwmDutyX10):
+    builder.PrependUint16Slot(24, pwmDutyX10, 500)
+
+def AddPwmDutyX10(builder, pwmDutyX10):
+    ConfigurationRequestAddPwmDutyX10(builder, pwmDutyX10)
 
 def ConfigurationRequestEnd(builder):
     return builder.EndObject()

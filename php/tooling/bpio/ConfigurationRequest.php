@@ -215,21 +215,66 @@ class ConfigurationRequest extends Table
     }
 
     /**
+     * @return byte
+     */
+    public function getPwmPin()
+    {
+        $o = $this->__offset(44);
+        return $o != 0 ? $this->bb->getByte($o + $this->bb_pos) : 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getPwmEnable()
+    {
+        $o = $this->__offset(46);
+        return $o != 0 ? $this->bb->getBool($o + $this->bb_pos) : false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getPwmDisable()
+    {
+        $o = $this->__offset(48);
+        return $o != 0 ? $this->bb->getBool($o + $this->bb_pos) : false;
+    }
+
+    /**
+     * @return uint
+     */
+    public function getPwmFrequencyHz()
+    {
+        $o = $this->__offset(50);
+        return $o != 0 ? $this->bb->getUint($o + $this->bb_pos) : 0;
+    }
+
+    /**
+     * @return ushort
+     */
+    public function getPwmDutyX10()
+    {
+        $o = $this->__offset(52);
+        return $o != 0 ? $this->bb->getUshort($o + $this->bb_pos) : 500;
+    }
+
+    /**
      * @param FlatBufferBuilder $builder
      * @return void
      */
     public static function startConfigurationRequest(FlatBufferBuilder $builder)
     {
-        $builder->StartObject(20);
+        $builder->StartObject(25);
     }
 
     /**
      * @param FlatBufferBuilder $builder
      * @return ConfigurationRequest
      */
-    public static function createConfigurationRequest(FlatBufferBuilder $builder, $mode, $mode_configuration, $mode_bitorder_msb, $mode_bitorder_lsb, $psu_disable, $psu_enable, $psu_set_mv, $psu_set_ma, $pullup_disable, $pullup_enable, $io_direction_mask, $io_direction, $io_value_mask, $io_value, $led_resume, $led_color, $print_string, $hardware_bootloader, $hardware_reset, $hardware_selftest)
+    public static function createConfigurationRequest(FlatBufferBuilder $builder, $mode, $mode_configuration, $mode_bitorder_msb, $mode_bitorder_lsb, $psu_disable, $psu_enable, $psu_set_mv, $psu_set_ma, $pullup_disable, $pullup_enable, $io_direction_mask, $io_direction, $io_value_mask, $io_value, $led_resume, $led_color, $print_string, $hardware_bootloader, $hardware_reset, $hardware_selftest, $pwm_pin, $pwm_enable, $pwm_disable, $pwm_frequency_hz, $pwm_duty_x10)
     {
-        $builder->startObject(20);
+        $builder->startObject(25);
         self::addMode($builder, $mode);
         self::addModeConfiguration($builder, $mode_configuration);
         self::addModeBitorderMsb($builder, $mode_bitorder_msb);
@@ -250,6 +295,11 @@ class ConfigurationRequest extends Table
         self::addHardwareBootloader($builder, $hardware_bootloader);
         self::addHardwareReset($builder, $hardware_reset);
         self::addHardwareSelftest($builder, $hardware_selftest);
+        self::addPwmPin($builder, $pwm_pin);
+        self::addPwmEnable($builder, $pwm_enable);
+        self::addPwmDisable($builder, $pwm_disable);
+        self::addPwmFrequencyHz($builder, $pwm_frequency_hz);
+        self::addPwmDutyX10($builder, $pwm_duty_x10);
         $o = $builder->endObject();
         return $o;
     }
@@ -476,6 +526,56 @@ class ConfigurationRequest extends Table
     public static function addHardwareSelftest(FlatBufferBuilder $builder, $hardwareSelftest)
     {
         $builder->addBoolX(19, $hardwareSelftest, false);
+    }
+
+    /**
+     * @param FlatBufferBuilder $builder
+     * @param byte
+     * @return void
+     */
+    public static function addPwmPin(FlatBufferBuilder $builder, $pwmPin)
+    {
+        $builder->addByteX(20, $pwmPin, 0);
+    }
+
+    /**
+     * @param FlatBufferBuilder $builder
+     * @param bool
+     * @return void
+     */
+    public static function addPwmEnable(FlatBufferBuilder $builder, $pwmEnable)
+    {
+        $builder->addBoolX(21, $pwmEnable, false);
+    }
+
+    /**
+     * @param FlatBufferBuilder $builder
+     * @param bool
+     * @return void
+     */
+    public static function addPwmDisable(FlatBufferBuilder $builder, $pwmDisable)
+    {
+        $builder->addBoolX(22, $pwmDisable, false);
+    }
+
+    /**
+     * @param FlatBufferBuilder $builder
+     * @param uint
+     * @return void
+     */
+    public static function addPwmFrequencyHz(FlatBufferBuilder $builder, $pwmFrequencyHz)
+    {
+        $builder->addUintX(23, $pwmFrequencyHz, 0);
+    }
+
+    /**
+     * @param FlatBufferBuilder $builder
+     * @param ushort
+     * @return void
+     */
+    public static function addPwmDutyX10(FlatBufferBuilder $builder, $pwmDutyX10)
+    {
+        $builder->addUshortX(24, $pwmDutyX10, 500);
     }
 
     /**

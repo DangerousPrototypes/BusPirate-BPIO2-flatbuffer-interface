@@ -752,10 +752,15 @@ class ConfigurationRequest {
   bool get hardwareBootloader => const fb.BoolReader().vTableGet(_bc, _bcOffset, 38, false);
   bool get hardwareReset => const fb.BoolReader().vTableGet(_bc, _bcOffset, 40, false);
   bool get hardwareSelftest => const fb.BoolReader().vTableGet(_bc, _bcOffset, 42, false);
+  int get pwmPin => const fb.Uint8Reader().vTableGet(_bc, _bcOffset, 44, 0);
+  bool get pwmEnable => const fb.BoolReader().vTableGet(_bc, _bcOffset, 46, false);
+  bool get pwmDisable => const fb.BoolReader().vTableGet(_bc, _bcOffset, 48, false);
+  int get pwmFrequencyHz => const fb.Uint32Reader().vTableGet(_bc, _bcOffset, 50, 0);
+  int get pwmDutyX10 => const fb.Uint16Reader().vTableGet(_bc, _bcOffset, 52, 500);
 
   @override
   String toString() {
-    return 'ConfigurationRequest{mode: ${mode}, modeConfiguration: ${modeConfiguration}, modeBitorderMsb: ${modeBitorderMsb}, modeBitorderLsb: ${modeBitorderLsb}, psuDisable: ${psuDisable}, psuEnable: ${psuEnable}, psuSetMv: ${psuSetMv}, psuSetMa: ${psuSetMa}, pullupDisable: ${pullupDisable}, pullupEnable: ${pullupEnable}, ioDirectionMask: ${ioDirectionMask}, ioDirection: ${ioDirection}, ioValueMask: ${ioValueMask}, ioValue: ${ioValue}, ledResume: ${ledResume}, ledColor: ${ledColor}, printString: ${printString}, hardwareBootloader: ${hardwareBootloader}, hardwareReset: ${hardwareReset}, hardwareSelftest: ${hardwareSelftest}}';
+    return 'ConfigurationRequest{mode: ${mode}, modeConfiguration: ${modeConfiguration}, modeBitorderMsb: ${modeBitorderMsb}, modeBitorderLsb: ${modeBitorderLsb}, psuDisable: ${psuDisable}, psuEnable: ${psuEnable}, psuSetMv: ${psuSetMv}, psuSetMa: ${psuSetMa}, pullupDisable: ${pullupDisable}, pullupEnable: ${pullupEnable}, ioDirectionMask: ${ioDirectionMask}, ioDirection: ${ioDirection}, ioValueMask: ${ioValueMask}, ioValue: ${ioValue}, ledResume: ${ledResume}, ledColor: ${ledColor}, printString: ${printString}, hardwareBootloader: ${hardwareBootloader}, hardwareReset: ${hardwareReset}, hardwareSelftest: ${hardwareSelftest}, pwmPin: ${pwmPin}, pwmEnable: ${pwmEnable}, pwmDisable: ${pwmDisable}, pwmFrequencyHz: ${pwmFrequencyHz}, pwmDutyX10: ${pwmDutyX10}}';
   }
 }
 
@@ -773,7 +778,7 @@ class ConfigurationRequestBuilder {
   final fb.Builder fbBuilder;
 
   void begin() {
-    fbBuilder.startTable(20);
+    fbBuilder.startTable(25);
   }
 
   int addModeOffset(int? offset) {
@@ -856,6 +861,26 @@ class ConfigurationRequestBuilder {
     fbBuilder.addBool(19, hardwareSelftest);
     return fbBuilder.offset;
   }
+  int addPwmPin(int? pwmPin) {
+    fbBuilder.addUint8(20, pwmPin);
+    return fbBuilder.offset;
+  }
+  int addPwmEnable(bool? pwmEnable) {
+    fbBuilder.addBool(21, pwmEnable);
+    return fbBuilder.offset;
+  }
+  int addPwmDisable(bool? pwmDisable) {
+    fbBuilder.addBool(22, pwmDisable);
+    return fbBuilder.offset;
+  }
+  int addPwmFrequencyHz(int? pwmFrequencyHz) {
+    fbBuilder.addUint32(23, pwmFrequencyHz);
+    return fbBuilder.offset;
+  }
+  int addPwmDutyX10(int? pwmDutyX10) {
+    fbBuilder.addUint16(24, pwmDutyX10);
+    return fbBuilder.offset;
+  }
 
   int finish() {
     return fbBuilder.endTable();
@@ -883,6 +908,11 @@ class ConfigurationRequestObjectBuilder extends fb.ObjectBuilder {
   final bool? _hardwareBootloader;
   final bool? _hardwareReset;
   final bool? _hardwareSelftest;
+  final int? _pwmPin;
+  final bool? _pwmEnable;
+  final bool? _pwmDisable;
+  final int? _pwmFrequencyHz;
+  final int? _pwmDutyX10;
 
   ConfigurationRequestObjectBuilder({
     String? mode,
@@ -905,6 +935,11 @@ class ConfigurationRequestObjectBuilder extends fb.ObjectBuilder {
     bool? hardwareBootloader,
     bool? hardwareReset,
     bool? hardwareSelftest,
+    int? pwmPin,
+    bool? pwmEnable,
+    bool? pwmDisable,
+    int? pwmFrequencyHz,
+    int? pwmDutyX10,
   })
       : _mode = mode,
         _modeConfiguration = modeConfiguration,
@@ -925,7 +960,12 @@ class ConfigurationRequestObjectBuilder extends fb.ObjectBuilder {
         _printString = printString,
         _hardwareBootloader = hardwareBootloader,
         _hardwareReset = hardwareReset,
-        _hardwareSelftest = hardwareSelftest;
+        _hardwareSelftest = hardwareSelftest,
+        _pwmPin = pwmPin,
+        _pwmEnable = pwmEnable,
+        _pwmDisable = pwmDisable,
+        _pwmFrequencyHz = pwmFrequencyHz,
+        _pwmDutyX10 = pwmDutyX10;
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -937,7 +977,7 @@ class ConfigurationRequestObjectBuilder extends fb.ObjectBuilder {
         : fbBuilder.writeListUint32(_ledColor!);
     final int? printStringOffset = _printString == null ? null
         : fbBuilder.writeString(_printString!);
-    fbBuilder.startTable(20);
+    fbBuilder.startTable(25);
     fbBuilder.addOffset(0, modeOffset);
     fbBuilder.addOffset(1, modeConfigurationOffset);
     fbBuilder.addBool(2, _modeBitorderMsb);
@@ -958,6 +998,11 @@ class ConfigurationRequestObjectBuilder extends fb.ObjectBuilder {
     fbBuilder.addBool(17, _hardwareBootloader);
     fbBuilder.addBool(18, _hardwareReset);
     fbBuilder.addBool(19, _hardwareSelftest);
+    fbBuilder.addUint8(20, _pwmPin);
+    fbBuilder.addBool(21, _pwmEnable);
+    fbBuilder.addBool(22, _pwmDisable);
+    fbBuilder.addUint32(23, _pwmFrequencyHz);
+    fbBuilder.addUint16(24, _pwmDutyX10);
     return fbBuilder.endTable();
   }
 

@@ -139,8 +139,33 @@ hardwareSelftest():boolean {
   return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
 }
 
+pwmPin():number {
+  const offset = this.bb!.__offset(this.bb_pos, 44);
+  return offset ? this.bb!.readUint8(this.bb_pos + offset) : 0;
+}
+
+pwmEnable():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 46);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
+}
+
+pwmDisable():boolean {
+  const offset = this.bb!.__offset(this.bb_pos, 48);
+  return offset ? !!this.bb!.readInt8(this.bb_pos + offset) : false;
+}
+
+pwmFrequencyHz():number {
+  const offset = this.bb!.__offset(this.bb_pos, 50);
+  return offset ? this.bb!.readUint32(this.bb_pos + offset) : 0;
+}
+
+pwmDutyX10():number {
+  const offset = this.bb!.__offset(this.bb_pos, 52);
+  return offset ? this.bb!.readUint16(this.bb_pos + offset) : 500;
+}
+
 static startConfigurationRequest(builder:flatbuffers.Builder) {
-  builder.startObject(20);
+  builder.startObject(25);
 }
 
 static addMode(builder:flatbuffers.Builder, modeOffset:flatbuffers.Offset) {
@@ -238,6 +263,26 @@ static addHardwareReset(builder:flatbuffers.Builder, hardwareReset:boolean) {
 
 static addHardwareSelftest(builder:flatbuffers.Builder, hardwareSelftest:boolean) {
   builder.addFieldInt8(19, +hardwareSelftest, +false);
+}
+
+static addPwmPin(builder:flatbuffers.Builder, pwmPin:number) {
+  builder.addFieldInt8(20, pwmPin, 0);
+}
+
+static addPwmEnable(builder:flatbuffers.Builder, pwmEnable:boolean) {
+  builder.addFieldInt8(21, +pwmEnable, +false);
+}
+
+static addPwmDisable(builder:flatbuffers.Builder, pwmDisable:boolean) {
+  builder.addFieldInt8(22, +pwmDisable, +false);
+}
+
+static addPwmFrequencyHz(builder:flatbuffers.Builder, pwmFrequencyHz:number) {
+  builder.addFieldInt32(23, pwmFrequencyHz, 0);
+}
+
+static addPwmDutyX10(builder:flatbuffers.Builder, pwmDutyX10:number) {
+  builder.addFieldInt16(24, pwmDutyX10, 500);
 }
 
 static endConfigurationRequest(builder:flatbuffers.Builder):flatbuffers.Offset {

@@ -88,12 +88,36 @@ table ConfigurationRequest {
   hardware_bootloader:bool; // Enter bootloader mode.
   hardware_reset:bool; // Hardware reset the device.
   hardware_selftest:bool; // Perform a self-test on the device.
+  pwm_pin:uint8;          // IO pin number (0-7) for PWM control. // New in 2.3: PWM control
+  pwm_enable:bool;        // Enable PWM on the specified pin.
+  pwm_disable:bool;       // Disable PWM on the specified pin.
+  pwm_frequency_hz:uint32; // PWM frequency in Hz (8-62500000).
+  pwm_duty_x10:uint16=500; // Duty cycle in 0.1%% steps (0-1000 = 0.0%%-100.0%%).  
 }
 
 table ConfigurationResponse{
   error:string; // Error message if any.
 }
 
+// Bitwise pin control operations for 2wire and 3wire modes
+// Values can be combined using bitwise OR for atomic operations
+/*
+enum BitwiseOps:ubyte {
+  NONE = 0,
+  
+  // Data pin operations (bits 0-1)
+  DATA_LOW = 1,        // 0x01 = 0b00000001 - Set data pin low
+  DATA_HIGH = 2,       // 0x02 = 0b00000010 - Set data pin high
+  
+  // Clock pin operations (bits 2-3)
+  CLOCK_LOW = 4,       // 0x04 = 0b00000100 - Set clock pin low
+  CLOCK_HIGH = 8,      // 0x08 = 0b00001000 - Set clock pin high
+  CLOCK_PULSE = 12,    // 0x0C = 0b00001100 - Generate clock pulse (high then low)
+  
+  // Read operation (bit 4)
+  READ = 16            // 0x10 = 0b00010000 - Read data input pin
+}
+*/
 table DataRequest {
   start_main:bool; // Start condition.
   start_alt:bool; // Alternate start condition.
@@ -101,15 +125,16 @@ table DataRequest {
   bytes_read:uint16; // Number of bytes to read.
   stop_main:bool; // Stop condition.
   stop_alt:bool; // Alternate stop condition.
+  //bitwise_ops:[ubyte]; // NEW in 2.2: Bitwise pin operations (2wire/3wire only) - array of BitwiseOps values
 }
 
 table DataResponse {
   error:string; // Error message if any.
   data_read:[ubyte]; // Data read from device
-  is_async: bool = false;  // NEW 2.2: marks this as unsolicited async data
+  is_async:bool = false; // NEW in 2.2: True if this is unsolicited async data
 }
 
-union RequestPacketContents { StatusRequest, ConfigurationRequest, DataRequest}
+union RequestPacketContents {StatusRequest, ConfigurationRequest, DataRequest}
 
 table RequestPacket {
   version_major:uint8;

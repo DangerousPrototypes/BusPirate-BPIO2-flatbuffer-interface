@@ -57,6 +57,11 @@ public final class ConfigurationRequest extends Table {
   public boolean hardwareBootloader() { int o = __offset(38); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
   public boolean hardwareReset() { int o = __offset(40); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
   public boolean hardwareSelftest() { int o = __offset(42); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  public int pwmPin() { int o = __offset(44); return o != 0 ? bb.get(o + bb_pos) & 0xFF : 0; }
+  public boolean pwmEnable() { int o = __offset(46); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  public boolean pwmDisable() { int o = __offset(48); return o != 0 ? 0!=bb.get(o + bb_pos) : false; }
+  public long pwmFrequencyHz() { int o = __offset(50); return o != 0 ? (long)bb.getInt(o + bb_pos) & 0xFFFFFFFFL : 0L; }
+  public int pwmDutyX10() { int o = __offset(52); return o != 0 ? bb.getShort(o + bb_pos) & 0xFFFF : 500; }
 
   public static int createConfigurationRequest(FlatBufferBuilder builder,
       int modeOffset,
@@ -78,14 +83,24 @@ public final class ConfigurationRequest extends Table {
       int printStringOffset,
       boolean hardwareBootloader,
       boolean hardwareReset,
-      boolean hardwareSelftest) {
-    builder.startTable(20);
+      boolean hardwareSelftest,
+      int pwmPin,
+      boolean pwmEnable,
+      boolean pwmDisable,
+      long pwmFrequencyHz,
+      int pwmDutyX10) {
+    builder.startTable(25);
+    ConfigurationRequest.addPwmFrequencyHz(builder, pwmFrequencyHz);
     ConfigurationRequest.addPrintString(builder, printStringOffset);
     ConfigurationRequest.addLedColor(builder, ledColorOffset);
     ConfigurationRequest.addPsuSetMv(builder, psuSetMv);
     ConfigurationRequest.addModeConfiguration(builder, modeConfigurationOffset);
     ConfigurationRequest.addMode(builder, modeOffset);
+    ConfigurationRequest.addPwmDutyX10(builder, pwmDutyX10);
     ConfigurationRequest.addPsuSetMa(builder, psuSetMa);
+    ConfigurationRequest.addPwmDisable(builder, pwmDisable);
+    ConfigurationRequest.addPwmEnable(builder, pwmEnable);
+    ConfigurationRequest.addPwmPin(builder, pwmPin);
     ConfigurationRequest.addHardwareSelftest(builder, hardwareSelftest);
     ConfigurationRequest.addHardwareReset(builder, hardwareReset);
     ConfigurationRequest.addHardwareBootloader(builder, hardwareBootloader);
@@ -103,7 +118,7 @@ public final class ConfigurationRequest extends Table {
     return ConfigurationRequest.endConfigurationRequest(builder);
   }
 
-  public static void startConfigurationRequest(FlatBufferBuilder builder) { builder.startTable(20); }
+  public static void startConfigurationRequest(FlatBufferBuilder builder) { builder.startTable(25); }
   public static void addMode(FlatBufferBuilder builder, int modeOffset) { builder.addOffset(0, modeOffset, 0); }
   public static void addModeConfiguration(FlatBufferBuilder builder, int modeConfigurationOffset) { builder.addOffset(1, modeConfigurationOffset, 0); }
   public static void addModeBitorderMsb(FlatBufferBuilder builder, boolean modeBitorderMsb) { builder.addBoolean(2, modeBitorderMsb, false); }
@@ -126,6 +141,11 @@ public final class ConfigurationRequest extends Table {
   public static void addHardwareBootloader(FlatBufferBuilder builder, boolean hardwareBootloader) { builder.addBoolean(17, hardwareBootloader, false); }
   public static void addHardwareReset(FlatBufferBuilder builder, boolean hardwareReset) { builder.addBoolean(18, hardwareReset, false); }
   public static void addHardwareSelftest(FlatBufferBuilder builder, boolean hardwareSelftest) { builder.addBoolean(19, hardwareSelftest, false); }
+  public static void addPwmPin(FlatBufferBuilder builder, int pwmPin) { builder.addByte(20, (byte) pwmPin, (byte) 0); }
+  public static void addPwmEnable(FlatBufferBuilder builder, boolean pwmEnable) { builder.addBoolean(21, pwmEnable, false); }
+  public static void addPwmDisable(FlatBufferBuilder builder, boolean pwmDisable) { builder.addBoolean(22, pwmDisable, false); }
+  public static void addPwmFrequencyHz(FlatBufferBuilder builder, long pwmFrequencyHz) { builder.addInt(23, (int) pwmFrequencyHz, (int) 0L); }
+  public static void addPwmDutyX10(FlatBufferBuilder builder, int pwmDutyX10) { builder.addShort(24, (short) pwmDutyX10, (short) 500); }
   public static int endConfigurationRequest(FlatBufferBuilder builder) {
     int o = builder.endTable();
     return o;

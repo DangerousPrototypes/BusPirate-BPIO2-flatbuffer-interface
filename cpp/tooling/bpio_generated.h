@@ -838,7 +838,12 @@ struct ConfigurationRequest FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Tab
     VT_PRINT_STRING = 36,
     VT_HARDWARE_BOOTLOADER = 38,
     VT_HARDWARE_RESET = 40,
-    VT_HARDWARE_SELFTEST = 42
+    VT_HARDWARE_SELFTEST = 42,
+    VT_PWM_PIN = 44,
+    VT_PWM_ENABLE = 46,
+    VT_PWM_DISABLE = 48,
+    VT_PWM_FREQUENCY_HZ = 50,
+    VT_PWM_DUTY_X10 = 52
   };
   const ::flatbuffers::String *mode() const {
     return GetPointer<const ::flatbuffers::String *>(VT_MODE);
@@ -900,6 +905,21 @@ struct ConfigurationRequest FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Tab
   bool hardware_selftest() const {
     return GetField<uint8_t>(VT_HARDWARE_SELFTEST, 0) != 0;
   }
+  uint8_t pwm_pin() const {
+    return GetField<uint8_t>(VT_PWM_PIN, 0);
+  }
+  bool pwm_enable() const {
+    return GetField<uint8_t>(VT_PWM_ENABLE, 0) != 0;
+  }
+  bool pwm_disable() const {
+    return GetField<uint8_t>(VT_PWM_DISABLE, 0) != 0;
+  }
+  uint32_t pwm_frequency_hz() const {
+    return GetField<uint32_t>(VT_PWM_FREQUENCY_HZ, 0);
+  }
+  uint16_t pwm_duty_x10() const {
+    return GetField<uint16_t>(VT_PWM_DUTY_X10, 500);
+  }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_MODE) &&
@@ -926,6 +946,11 @@ struct ConfigurationRequest FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Tab
            VerifyField<uint8_t>(verifier, VT_HARDWARE_BOOTLOADER, 1) &&
            VerifyField<uint8_t>(verifier, VT_HARDWARE_RESET, 1) &&
            VerifyField<uint8_t>(verifier, VT_HARDWARE_SELFTEST, 1) &&
+           VerifyField<uint8_t>(verifier, VT_PWM_PIN, 1) &&
+           VerifyField<uint8_t>(verifier, VT_PWM_ENABLE, 1) &&
+           VerifyField<uint8_t>(verifier, VT_PWM_DISABLE, 1) &&
+           VerifyField<uint32_t>(verifier, VT_PWM_FREQUENCY_HZ, 4) &&
+           VerifyField<uint16_t>(verifier, VT_PWM_DUTY_X10, 2) &&
            verifier.EndTable();
   }
 };
@@ -994,6 +1019,21 @@ struct ConfigurationRequestBuilder {
   void add_hardware_selftest(bool hardware_selftest) {
     fbb_.AddElement<uint8_t>(ConfigurationRequest::VT_HARDWARE_SELFTEST, static_cast<uint8_t>(hardware_selftest), 0);
   }
+  void add_pwm_pin(uint8_t pwm_pin) {
+    fbb_.AddElement<uint8_t>(ConfigurationRequest::VT_PWM_PIN, pwm_pin, 0);
+  }
+  void add_pwm_enable(bool pwm_enable) {
+    fbb_.AddElement<uint8_t>(ConfigurationRequest::VT_PWM_ENABLE, static_cast<uint8_t>(pwm_enable), 0);
+  }
+  void add_pwm_disable(bool pwm_disable) {
+    fbb_.AddElement<uint8_t>(ConfigurationRequest::VT_PWM_DISABLE, static_cast<uint8_t>(pwm_disable), 0);
+  }
+  void add_pwm_frequency_hz(uint32_t pwm_frequency_hz) {
+    fbb_.AddElement<uint32_t>(ConfigurationRequest::VT_PWM_FREQUENCY_HZ, pwm_frequency_hz, 0);
+  }
+  void add_pwm_duty_x10(uint16_t pwm_duty_x10) {
+    fbb_.AddElement<uint16_t>(ConfigurationRequest::VT_PWM_DUTY_X10, pwm_duty_x10, 500);
+  }
   explicit ConfigurationRequestBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -1026,14 +1066,24 @@ inline ::flatbuffers::Offset<ConfigurationRequest> CreateConfigurationRequest(
     ::flatbuffers::Offset<::flatbuffers::String> print_string = 0,
     bool hardware_bootloader = false,
     bool hardware_reset = false,
-    bool hardware_selftest = false) {
+    bool hardware_selftest = false,
+    uint8_t pwm_pin = 0,
+    bool pwm_enable = false,
+    bool pwm_disable = false,
+    uint32_t pwm_frequency_hz = 0,
+    uint16_t pwm_duty_x10 = 500) {
   ConfigurationRequestBuilder builder_(_fbb);
+  builder_.add_pwm_frequency_hz(pwm_frequency_hz);
   builder_.add_print_string(print_string);
   builder_.add_led_color(led_color);
   builder_.add_psu_set_mv(psu_set_mv);
   builder_.add_mode_configuration(mode_configuration);
   builder_.add_mode(mode);
+  builder_.add_pwm_duty_x10(pwm_duty_x10);
   builder_.add_psu_set_ma(psu_set_ma);
+  builder_.add_pwm_disable(pwm_disable);
+  builder_.add_pwm_enable(pwm_enable);
+  builder_.add_pwm_pin(pwm_pin);
   builder_.add_hardware_selftest(hardware_selftest);
   builder_.add_hardware_reset(hardware_reset);
   builder_.add_hardware_bootloader(hardware_bootloader);
@@ -1072,7 +1122,12 @@ inline ::flatbuffers::Offset<ConfigurationRequest> CreateConfigurationRequestDir
     const char *print_string = nullptr,
     bool hardware_bootloader = false,
     bool hardware_reset = false,
-    bool hardware_selftest = false) {
+    bool hardware_selftest = false,
+    uint8_t pwm_pin = 0,
+    bool pwm_enable = false,
+    bool pwm_disable = false,
+    uint32_t pwm_frequency_hz = 0,
+    uint16_t pwm_duty_x10 = 500) {
   auto mode__ = mode ? _fbb.CreateString(mode) : 0;
   auto led_color__ = led_color ? _fbb.CreateVector<uint32_t>(*led_color) : 0;
   auto print_string__ = print_string ? _fbb.CreateString(print_string) : 0;
@@ -1097,7 +1152,12 @@ inline ::flatbuffers::Offset<ConfigurationRequest> CreateConfigurationRequestDir
       print_string__,
       hardware_bootloader,
       hardware_reset,
-      hardware_selftest);
+      hardware_selftest,
+      pwm_pin,
+      pwm_enable,
+      pwm_disable,
+      pwm_frequency_hz,
+      pwm_duty_x10);
 }
 
 struct ConfigurationResponse FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {

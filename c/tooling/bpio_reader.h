@@ -308,6 +308,11 @@ __flatbuffers_define_string_field(16, bpio_ConfigurationRequest, print_string, 0
 __flatbuffers_define_scalar_field(17, bpio_ConfigurationRequest, hardware_bootloader, flatbuffers_bool, flatbuffers_bool_t, UINT8_C(0))
 __flatbuffers_define_scalar_field(18, bpio_ConfigurationRequest, hardware_reset, flatbuffers_bool, flatbuffers_bool_t, UINT8_C(0))
 __flatbuffers_define_scalar_field(19, bpio_ConfigurationRequest, hardware_selftest, flatbuffers_bool, flatbuffers_bool_t, UINT8_C(0))
+__flatbuffers_define_scalar_field(20, bpio_ConfigurationRequest, pwm_pin, flatbuffers_uint8, uint8_t, UINT8_C(0))
+__flatbuffers_define_scalar_field(21, bpio_ConfigurationRequest, pwm_enable, flatbuffers_bool, flatbuffers_bool_t, UINT8_C(0))
+__flatbuffers_define_scalar_field(22, bpio_ConfigurationRequest, pwm_disable, flatbuffers_bool, flatbuffers_bool_t, UINT8_C(0))
+__flatbuffers_define_scalar_field(23, bpio_ConfigurationRequest, pwm_frequency_hz, flatbuffers_uint32, uint32_t, UINT32_C(0))
+__flatbuffers_define_scalar_field(24, bpio_ConfigurationRequest, pwm_duty_x10, flatbuffers_uint16, uint16_t, UINT16_C(500))
 
 struct bpio_ConfigurationResponse_table { uint8_t unused__; };
 

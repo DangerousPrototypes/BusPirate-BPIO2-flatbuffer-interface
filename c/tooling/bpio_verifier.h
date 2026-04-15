@@ -243,6 +243,11 @@ static int bpio_ConfigurationRequest_verify_table(flatcc_table_verifier_descript
     if ((ret = flatcc_verify_field(td, 17, 1, 1) /* hardware_bootloader */)) return ret;
     if ((ret = flatcc_verify_field(td, 18, 1, 1) /* hardware_reset */)) return ret;
     if ((ret = flatcc_verify_field(td, 19, 1, 1) /* hardware_selftest */)) return ret;
+    if ((ret = flatcc_verify_field(td, 20, 1, 1) /* pwm_pin */)) return ret;
+    if ((ret = flatcc_verify_field(td, 21, 1, 1) /* pwm_enable */)) return ret;
+    if ((ret = flatcc_verify_field(td, 22, 1, 1) /* pwm_disable */)) return ret;
+    if ((ret = flatcc_verify_field(td, 23, 4, 4) /* pwm_frequency_hz */)) return ret;
+    if ((ret = flatcc_verify_field(td, 24, 2, 2) /* pwm_duty_x10 */)) return ret;
     return flatcc_verify_ok;
 }
 

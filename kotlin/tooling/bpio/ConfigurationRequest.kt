@@ -153,6 +153,31 @@ class ConfigurationRequest : Table() {
             val o = __offset(42)
             return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else false
         }
+    val pwmPin : UByte
+        get() {
+            val o = __offset(44)
+            return if(o != 0) bb.get(o + bb_pos).toUByte() else 0u
+        }
+    val pwmEnable : Boolean
+        get() {
+            val o = __offset(46)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else false
+        }
+    val pwmDisable : Boolean
+        get() {
+            val o = __offset(48)
+            return if(o != 0) 0.toByte() != bb.get(o + bb_pos) else false
+        }
+    val pwmFrequencyHz : UInt
+        get() {
+            val o = __offset(50)
+            return if(o != 0) bb.getInt(o + bb_pos).toUInt() else 0u
+        }
+    val pwmDutyX10 : UShort
+        get() {
+            val o = __offset(52)
+            return if(o != 0) bb.getShort(o + bb_pos).toUShort() else 500u
+        }
     companion object {
         fun validateVersion() = Constants.FLATBUFFERS_25_2_10()
         fun getRootAsConfigurationRequest(_bb: ByteBuffer): ConfigurationRequest = getRootAsConfigurationRequest(_bb, ConfigurationRequest())
@@ -160,14 +185,19 @@ class ConfigurationRequest : Table() {
             _bb.order(ByteOrder.LITTLE_ENDIAN)
             return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb))
         }
-        fun createConfigurationRequest(builder: FlatBufferBuilder, modeOffset: Int, modeConfigurationOffset: Int, modeBitorderMsb: Boolean, modeBitorderLsb: Boolean, psuDisable: Boolean, psuEnable: Boolean, psuSetMv: UInt, psuSetMa: UShort, pullupDisable: Boolean, pullupEnable: Boolean, ioDirectionMask: UByte, ioDirection: UByte, ioValueMask: UByte, ioValue: UByte, ledResume: Boolean, ledColorOffset: Int, printStringOffset: Int, hardwareBootloader: Boolean, hardwareReset: Boolean, hardwareSelftest: Boolean) : Int {
-            builder.startTable(20)
+        fun createConfigurationRequest(builder: FlatBufferBuilder, modeOffset: Int, modeConfigurationOffset: Int, modeBitorderMsb: Boolean, modeBitorderLsb: Boolean, psuDisable: Boolean, psuEnable: Boolean, psuSetMv: UInt, psuSetMa: UShort, pullupDisable: Boolean, pullupEnable: Boolean, ioDirectionMask: UByte, ioDirection: UByte, ioValueMask: UByte, ioValue: UByte, ledResume: Boolean, ledColorOffset: Int, printStringOffset: Int, hardwareBootloader: Boolean, hardwareReset: Boolean, hardwareSelftest: Boolean, pwmPin: UByte, pwmEnable: Boolean, pwmDisable: Boolean, pwmFrequencyHz: UInt, pwmDutyX10: UShort) : Int {
+            builder.startTable(25)
+            addPwmFrequencyHz(builder, pwmFrequencyHz)
             addPrintString(builder, printStringOffset)
             addLedColor(builder, ledColorOffset)
             addPsuSetMv(builder, psuSetMv)
             addModeConfiguration(builder, modeConfigurationOffset)
             addMode(builder, modeOffset)
+            addPwmDutyX10(builder, pwmDutyX10)
             addPsuSetMa(builder, psuSetMa)
+            addPwmDisable(builder, pwmDisable)
+            addPwmEnable(builder, pwmEnable)
+            addPwmPin(builder, pwmPin)
             addHardwareSelftest(builder, hardwareSelftest)
             addHardwareReset(builder, hardwareReset)
             addHardwareBootloader(builder, hardwareBootloader)
@@ -184,7 +214,7 @@ class ConfigurationRequest : Table() {
             addModeBitorderMsb(builder, modeBitorderMsb)
             return endConfigurationRequest(builder)
         }
-        fun startConfigurationRequest(builder: FlatBufferBuilder) = builder.startTable(20)
+        fun startConfigurationRequest(builder: FlatBufferBuilder) = builder.startTable(25)
         fun addMode(builder: FlatBufferBuilder, mode: Int) = builder.addOffset(0, mode, 0)
         fun addModeConfiguration(builder: FlatBufferBuilder, modeConfiguration: Int) = builder.addOffset(1, modeConfiguration, 0)
         fun addModeBitorderMsb(builder: FlatBufferBuilder, modeBitorderMsb: Boolean) = builder.addBoolean(2, modeBitorderMsb, false)
@@ -214,6 +244,11 @@ class ConfigurationRequest : Table() {
         fun addHardwareBootloader(builder: FlatBufferBuilder, hardwareBootloader: Boolean) = builder.addBoolean(17, hardwareBootloader, false)
         fun addHardwareReset(builder: FlatBufferBuilder, hardwareReset: Boolean) = builder.addBoolean(18, hardwareReset, false)
         fun addHardwareSelftest(builder: FlatBufferBuilder, hardwareSelftest: Boolean) = builder.addBoolean(19, hardwareSelftest, false)
+        fun addPwmPin(builder: FlatBufferBuilder, pwmPin: UByte) = builder.addByte(20, pwmPin.toByte(), 0)
+        fun addPwmEnable(builder: FlatBufferBuilder, pwmEnable: Boolean) = builder.addBoolean(21, pwmEnable, false)
+        fun addPwmDisable(builder: FlatBufferBuilder, pwmDisable: Boolean) = builder.addBoolean(22, pwmDisable, false)
+        fun addPwmFrequencyHz(builder: FlatBufferBuilder, pwmFrequencyHz: UInt) = builder.addInt(23, pwmFrequencyHz.toInt(), 0)
+        fun addPwmDutyX10(builder: FlatBufferBuilder, pwmDutyX10: UShort) = builder.addShort(24, pwmDutyX10.toShort(), 500)
         fun endConfigurationRequest(builder: FlatBufferBuilder) : Int {
             val o = builder.endTable()
             return o

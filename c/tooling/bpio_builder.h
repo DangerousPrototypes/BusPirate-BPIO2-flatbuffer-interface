@@ -46,7 +46,7 @@ __flatbuffers_build_table(flatbuffers_, bpio_ModeConfiguration, 13)
 static const flatbuffers_voffset_t __bpio_ConfigurationRequest_required[] = { 0 };
 typedef flatbuffers_ref_t bpio_ConfigurationRequest_ref_t;
 static bpio_ConfigurationRequest_ref_t bpio_ConfigurationRequest_clone(flatbuffers_builder_t *B, bpio_ConfigurationRequest_table_t t);
-__flatbuffers_build_table(flatbuffers_, bpio_ConfigurationRequest, 20)
+__flatbuffers_build_table(flatbuffers_, bpio_ConfigurationRequest, 25)
 
 static const flatbuffers_voffset_t __bpio_ConfigurationResponse_required[] = { 0 };
 typedef flatbuffers_ref_t bpio_ConfigurationResponse_ref_t;
@@ -113,13 +113,15 @@ __flatbuffers_build_table_prolog(flatbuffers_, bpio_ModeConfiguration, bpio_Mode
   flatbuffers_bool_t v4, flatbuffers_bool_t v5, uint32_t v6, uint16_t v7,\
   flatbuffers_bool_t v8, flatbuffers_bool_t v9, uint8_t v10, uint8_t v11,\
   uint8_t v12, uint8_t v13, flatbuffers_bool_t v14, flatbuffers_uint32_vec_ref_t v15,\
-  flatbuffers_string_ref_t v16, flatbuffers_bool_t v17, flatbuffers_bool_t v18, flatbuffers_bool_t v19
+  flatbuffers_string_ref_t v16, flatbuffers_bool_t v17, flatbuffers_bool_t v18, flatbuffers_bool_t v19,\
+  uint8_t v20, flatbuffers_bool_t v21, flatbuffers_bool_t v22, uint32_t v23, uint16_t v24
 #define __bpio_ConfigurationRequest_call_args ,\
   v0, v1, v2, v3,\
   v4, v5, v6, v7,\
   v8, v9, v10, v11,\
   v12, v13, v14, v15,\
-  v16, v17, v18, v19
+  v16, v17, v18, v19,\
+  v20, v21, v22, v23, v24
 static inline bpio_ConfigurationRequest_ref_t bpio_ConfigurationRequest_create(flatbuffers_builder_t *B __bpio_ConfigurationRequest_formal_args);
 __flatbuffers_build_table_prolog(flatbuffers_, bpio_ConfigurationRequest, bpio_ConfigurationRequest_file_identifier, bpio_ConfigurationRequest_type_identifier)
 
@@ -393,6 +395,11 @@ __flatbuffers_build_string_field(16, flatbuffers_, bpio_ConfigurationRequest_pri
 __flatbuffers_build_scalar_field(17, flatbuffers_, bpio_ConfigurationRequest_hardware_bootloader, flatbuffers_bool, flatbuffers_bool_t, 1, 1, UINT8_C(0), bpio_ConfigurationRequest)
 __flatbuffers_build_scalar_field(18, flatbuffers_, bpio_ConfigurationRequest_hardware_reset, flatbuffers_bool, flatbuffers_bool_t, 1, 1, UINT8_C(0), bpio_ConfigurationRequest)
 __flatbuffers_build_scalar_field(19, flatbuffers_, bpio_ConfigurationRequest_hardware_selftest, flatbuffers_bool, flatbuffers_bool_t, 1, 1, UINT8_C(0), bpio_ConfigurationRequest)
+__flatbuffers_build_scalar_field(20, flatbuffers_, bpio_ConfigurationRequest_pwm_pin, flatbuffers_uint8, uint8_t, 1, 1, UINT8_C(0), bpio_ConfigurationRequest)
+__flatbuffers_build_scalar_field(21, flatbuffers_, bpio_ConfigurationRequest_pwm_enable, flatbuffers_bool, flatbuffers_bool_t, 1, 1, UINT8_C(0), bpio_ConfigurationRequest)
+__flatbuffers_build_scalar_field(22, flatbuffers_, bpio_ConfigurationRequest_pwm_disable, flatbuffers_bool, flatbuffers_bool_t, 1, 1, UINT8_C(0), bpio_ConfigurationRequest)
+__flatbuffers_build_scalar_field(23, flatbuffers_, bpio_ConfigurationRequest_pwm_frequency_hz, flatbuffers_uint32, uint32_t, 4, 4, UINT32_C(0), bpio_ConfigurationRequest)
+__flatbuffers_build_scalar_field(24, flatbuffers_, bpio_ConfigurationRequest_pwm_duty_x10, flatbuffers_uint16, uint16_t, 2, 2, UINT16_C(500), bpio_ConfigurationRequest)
 
 static inline bpio_ConfigurationRequest_ref_t bpio_ConfigurationRequest_create(flatbuffers_builder_t *B __bpio_ConfigurationRequest_formal_args)
 {
@@ -402,7 +409,9 @@ static inline bpio_ConfigurationRequest_ref_t bpio_ConfigurationRequest_create(f
         || bpio_ConfigurationRequest_psu_set_mv_add(B, v6)
         || bpio_ConfigurationRequest_led_color_add(B, v15)
         || bpio_ConfigurationRequest_print_string_add(B, v16)
+        || bpio_ConfigurationRequest_pwm_frequency_hz_add(B, v23)
         || bpio_ConfigurationRequest_psu_set_ma_add(B, v7)
+        || bpio_ConfigurationRequest_pwm_duty_x10_add(B, v24)
         || bpio_ConfigurationRequest_mode_bitorder_msb_add(B, v2)
         || bpio_ConfigurationRequest_mode_bitorder_lsb_add(B, v3)
         || bpio_ConfigurationRequest_psu_disable_add(B, v4)
@@ -416,7 +425,10 @@ static inline bpio_ConfigurationRequest_ref_t bpio_ConfigurationRequest_create(f
         || bpio_ConfigurationRequest_led_resume_add(B, v14)
         || bpio_ConfigurationRequest_hardware_bootloader_add(B, v17)
         || bpio_ConfigurationRequest_hardware_reset_add(B, v18)
-        || bpio_ConfigurationRequest_hardware_selftest_add(B, v19)) {
+        || bpio_ConfigurationRequest_hardware_selftest_add(B, v19)
+        || bpio_ConfigurationRequest_pwm_pin_add(B, v20)
+        || bpio_ConfigurationRequest_pwm_enable_add(B, v21)
+        || bpio_ConfigurationRequest_pwm_disable_add(B, v22)) {
         return 0;
     }
     return bpio_ConfigurationRequest_end(B);
@@ -431,7 +443,9 @@ static bpio_ConfigurationRequest_ref_t bpio_ConfigurationRequest_clone(flatbuffe
         || bpio_ConfigurationRequest_psu_set_mv_pick(B, t)
         || bpio_ConfigurationRequest_led_color_pick(B, t)
         || bpio_ConfigurationRequest_print_string_pick(B, t)
+        || bpio_ConfigurationRequest_pwm_frequency_hz_pick(B, t)
         || bpio_ConfigurationRequest_psu_set_ma_pick(B, t)
+        || bpio_ConfigurationRequest_pwm_duty_x10_pick(B, t)
         || bpio_ConfigurationRequest_mode_bitorder_msb_pick(B, t)
         || bpio_ConfigurationRequest_mode_bitorder_lsb_pick(B, t)
         || bpio_ConfigurationRequest_psu_disable_pick(B, t)
@@ -445,7 +459,10 @@ static bpio_ConfigurationRequest_ref_t bpio_ConfigurationRequest_clone(flatbuffe
         || bpio_ConfigurationRequest_led_resume_pick(B, t)
         || bpio_ConfigurationRequest_hardware_bootloader_pick(B, t)
         || bpio_ConfigurationRequest_hardware_reset_pick(B, t)
-        || bpio_ConfigurationRequest_hardware_selftest_pick(B, t)) {
+        || bpio_ConfigurationRequest_hardware_selftest_pick(B, t)
+        || bpio_ConfigurationRequest_pwm_pin_pick(B, t)
+        || bpio_ConfigurationRequest_pwm_enable_pick(B, t)
+        || bpio_ConfigurationRequest_pwm_disable_pick(B, t)) {
         return 0;
     }
     __flatbuffers_memoize_end(B, t, bpio_ConfigurationRequest_end(B));

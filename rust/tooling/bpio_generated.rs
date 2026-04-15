@@ -1328,6 +1328,11 @@ impl<'a> ConfigurationRequest<'a> {
   pub const VT_HARDWARE_BOOTLOADER: flatbuffers::VOffsetT = 38;
   pub const VT_HARDWARE_RESET: flatbuffers::VOffsetT = 40;
   pub const VT_HARDWARE_SELFTEST: flatbuffers::VOffsetT = 42;
+  pub const VT_PWM_PIN: flatbuffers::VOffsetT = 44;
+  pub const VT_PWM_ENABLE: flatbuffers::VOffsetT = 46;
+  pub const VT_PWM_DISABLE: flatbuffers::VOffsetT = 48;
+  pub const VT_PWM_FREQUENCY_HZ: flatbuffers::VOffsetT = 50;
+  pub const VT_PWM_DUTY_X10: flatbuffers::VOffsetT = 52;
 
   #[inline]
   pub unsafe fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
@@ -1339,12 +1344,17 @@ impl<'a> ConfigurationRequest<'a> {
     args: &'args ConfigurationRequestArgs<'args>
   ) -> flatbuffers::WIPOffset<ConfigurationRequest<'bldr>> {
     let mut builder = ConfigurationRequestBuilder::new(_fbb);
+    builder.add_pwm_frequency_hz(args.pwm_frequency_hz);
     if let Some(x) = args.print_string { builder.add_print_string(x); }
     if let Some(x) = args.led_color { builder.add_led_color(x); }
     builder.add_psu_set_mv(args.psu_set_mv);
     if let Some(x) = args.mode_configuration { builder.add_mode_configuration(x); }
     if let Some(x) = args.mode { builder.add_mode(x); }
+    builder.add_pwm_duty_x10(args.pwm_duty_x10);
     builder.add_psu_set_ma(args.psu_set_ma);
+    builder.add_pwm_disable(args.pwm_disable);
+    builder.add_pwm_enable(args.pwm_enable);
+    builder.add_pwm_pin(args.pwm_pin);
     builder.add_hardware_selftest(args.hardware_selftest);
     builder.add_hardware_reset(args.hardware_reset);
     builder.add_hardware_bootloader(args.hardware_bootloader);
@@ -1503,6 +1513,41 @@ impl<'a> ConfigurationRequest<'a> {
     // which contains a valid value in this slot
     unsafe { self._tab.get::<bool>(ConfigurationRequest::VT_HARDWARE_SELFTEST, Some(false)).unwrap()}
   }
+  #[inline]
+  pub fn pwm_pin(&self) -> u8 {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<u8>(ConfigurationRequest::VT_PWM_PIN, Some(0)).unwrap()}
+  }
+  #[inline]
+  pub fn pwm_enable(&self) -> bool {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(ConfigurationRequest::VT_PWM_ENABLE, Some(false)).unwrap()}
+  }
+  #[inline]
+  pub fn pwm_disable(&self) -> bool {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<bool>(ConfigurationRequest::VT_PWM_DISABLE, Some(false)).unwrap()}
+  }
+  #[inline]
+  pub fn pwm_frequency_hz(&self) -> u32 {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<u32>(ConfigurationRequest::VT_PWM_FREQUENCY_HZ, Some(0)).unwrap()}
+  }
+  #[inline]
+  pub fn pwm_duty_x10(&self) -> u16 {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<u16>(ConfigurationRequest::VT_PWM_DUTY_X10, Some(500)).unwrap()}
+  }
 }
 
 impl flatbuffers::Verifiable for ConfigurationRequest<'_> {
@@ -1532,6 +1577,11 @@ impl flatbuffers::Verifiable for ConfigurationRequest<'_> {
      .visit_field::<bool>("hardware_bootloader", Self::VT_HARDWARE_BOOTLOADER, false)?
      .visit_field::<bool>("hardware_reset", Self::VT_HARDWARE_RESET, false)?
      .visit_field::<bool>("hardware_selftest", Self::VT_HARDWARE_SELFTEST, false)?
+     .visit_field::<u8>("pwm_pin", Self::VT_PWM_PIN, false)?
+     .visit_field::<bool>("pwm_enable", Self::VT_PWM_ENABLE, false)?
+     .visit_field::<bool>("pwm_disable", Self::VT_PWM_DISABLE, false)?
+     .visit_field::<u32>("pwm_frequency_hz", Self::VT_PWM_FREQUENCY_HZ, false)?
+     .visit_field::<u16>("pwm_duty_x10", Self::VT_PWM_DUTY_X10, false)?
      .finish();
     Ok(())
   }
@@ -1557,6 +1607,11 @@ pub struct ConfigurationRequestArgs<'a> {
     pub hardware_bootloader: bool,
     pub hardware_reset: bool,
     pub hardware_selftest: bool,
+    pub pwm_pin: u8,
+    pub pwm_enable: bool,
+    pub pwm_disable: bool,
+    pub pwm_frequency_hz: u32,
+    pub pwm_duty_x10: u16,
 }
 impl<'a> Default for ConfigurationRequestArgs<'a> {
   #[inline]
@@ -1582,6 +1637,11 @@ impl<'a> Default for ConfigurationRequestArgs<'a> {
       hardware_bootloader: false,
       hardware_reset: false,
       hardware_selftest: false,
+      pwm_pin: 0,
+      pwm_enable: false,
+      pwm_disable: false,
+      pwm_frequency_hz: 0,
+      pwm_duty_x10: 500,
     }
   }
 }
@@ -1672,6 +1732,26 @@ impl<'a: 'b, 'b, A: flatbuffers::Allocator + 'a> ConfigurationRequestBuilder<'a,
     self.fbb_.push_slot::<bool>(ConfigurationRequest::VT_HARDWARE_SELFTEST, hardware_selftest, false);
   }
   #[inline]
+  pub fn add_pwm_pin(&mut self, pwm_pin: u8) {
+    self.fbb_.push_slot::<u8>(ConfigurationRequest::VT_PWM_PIN, pwm_pin, 0);
+  }
+  #[inline]
+  pub fn add_pwm_enable(&mut self, pwm_enable: bool) {
+    self.fbb_.push_slot::<bool>(ConfigurationRequest::VT_PWM_ENABLE, pwm_enable, false);
+  }
+  #[inline]
+  pub fn add_pwm_disable(&mut self, pwm_disable: bool) {
+    self.fbb_.push_slot::<bool>(ConfigurationRequest::VT_PWM_DISABLE, pwm_disable, false);
+  }
+  #[inline]
+  pub fn add_pwm_frequency_hz(&mut self, pwm_frequency_hz: u32) {
+    self.fbb_.push_slot::<u32>(ConfigurationRequest::VT_PWM_FREQUENCY_HZ, pwm_frequency_hz, 0);
+  }
+  #[inline]
+  pub fn add_pwm_duty_x10(&mut self, pwm_duty_x10: u16) {
+    self.fbb_.push_slot::<u16>(ConfigurationRequest::VT_PWM_DUTY_X10, pwm_duty_x10, 500);
+  }
+  #[inline]
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a, A>) -> ConfigurationRequestBuilder<'a, 'b, A> {
     let start = _fbb.start_table();
     ConfigurationRequestBuilder {
@@ -1709,6 +1789,11 @@ impl core::fmt::Debug for ConfigurationRequest<'_> {
       ds.field("hardware_bootloader", &self.hardware_bootloader());
       ds.field("hardware_reset", &self.hardware_reset());
       ds.field("hardware_selftest", &self.hardware_selftest());
+      ds.field("pwm_pin", &self.pwm_pin());
+      ds.field("pwm_enable", &self.pwm_enable());
+      ds.field("pwm_disable", &self.pwm_disable());
+      ds.field("pwm_frequency_hz", &self.pwm_frequency_hz());
+      ds.field("pwm_duty_x10", &self.pwm_duty_x10());
       ds.finish()
   }
 }
