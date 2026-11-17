@@ -201,28 +201,30 @@ class BPIOHDUART(BPIOBase):
         """Internal monitoring loop for async data"""
         while self._monitoring and self.configured:
             try:
-                # Check for async data using a very short timeout
+                # The Bus Pirate forwards received data in small packets (a few
+                # bytes each), so drain every queued packet on each pass and
+                # hand the data over as one chunk. Waiting up to 100 ms for the
+                # first packet keeps an idle loop from spinning.
+                data_read = []
                 async_data = self.client.check_async_data(timeout=0.1)
+                while async_data is not None:
+                    if async_data.get('is_async', False):
+                        data_read.extend(async_data.get('data_read', []))
+                    async_data = self.client.check_async_data()
 
-                if async_data and async_data.get('is_async', False):
-                    data_read = async_data.get('data_read', [])
+                if data_read:
+                    data_bytes = bytes(data_read)
 
-                    if data_read:
-                        data_bytes = bytes(data_read)
-
-                        # If callback is provided, call it; otherwise buffer the data
-                        if hasattr(self, '_async_callback') and self._async_callback:
-                            try:
-                                self._async_callback(data_bytes)
-                            except Exception as e:
-                                print(f"Async callback error: {e}")
-                        else:
-                            # No callback - accumulate in buffer for read_async()
-                            with self._async_lock:
-                                self._async_buffer.append(data_bytes)
-
-                # Small delay to prevent excessive CPU usage
-                time.sleep(0.01)
+                    # If callback is provided, call it; otherwise buffer the data
+                    if hasattr(self, '_async_callback') and self._async_callback:
+                        try:
+                            self._async_callback(data_bytes)
+                        except Exception as e:
+                            print(f"Async callback error: {e}")
+                    else:
+                        # No callback - accumulate in buffer for read_async()
+                        with self._async_lock:
+                            self._async_buffer.append(data_bytes)
 
             except Exception as e:
                 print(f"Async monitoring error: {e}")
